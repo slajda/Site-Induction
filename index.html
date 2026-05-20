@@ -621,7 +621,8 @@ input.invalid, select.invalid, textarea.invalid {
 
 <script>
 'use strict';
-var RECIPIENT = 'slajda@gmail.com';
+var RECIPIENT = 'slajda@gmail.com'; // display only
+var WEB3FORMS_KEY = 'YOUR_ACCESS_KEY'; // get free key at web3forms.com → enter slajda@gmail.com
 
 // Progress bar
 function updateProgress() {
@@ -786,12 +787,11 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
   canvas.toBlob(function(sigBlob) {
     var fd = new FormData();
 
-    // FormSubmit config fields
-    fd.append('_to',           RECIPIENT);
-    fd.append('_subject',      'Site Induction \u2014 ' + document.getElementById('fullName').value + ' \u2014 ' + document.getElementById('inductionDate').value);
-    fd.append('_template',     'table');
-    fd.append('_captcha',      'false');
-    fd.append('_autoresponse', 'Your Antvic Ltd site induction has been received. Thank you.');
+    // Web3Forms config fields
+    fd.append('access_key',    WEB3FORMS_KEY);
+    fd.append('subject',       'Site Induction \u2014 ' + document.getElementById('fullName').value + ' \u2014 ' + document.getElementById('inductionDate').value);
+    fd.append('from_name',     'Antvic Site Induction');
+    fd.append('botcheck',      '');
 
     // Form data
     fd.append('01 Full Name',          document.getElementById('fullName').value);
@@ -830,14 +830,14 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
       fd.append('26 Attachment ' + (i + 1), f, f.name);
     });
 
-    fetch('https://formsubmit.co/ajax/' + RECIPIENT, { method: 'POST', body: fd })
+    fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd })
       .then(function(r) {
         return r.json()
           .catch(function() { return {}; })
           .then(function(j) { return { r: r, j: j }; });
       })
       .then(function(res) {
-        var ok = res.j.success === true || res.j.success === 'true' || res.r.ok;
+        var ok = res.j.success === true || res.j.success === 'true';
         if (ok) {
           var s = document.getElementById('statusMsg');
           s.className = 'success';
@@ -854,8 +854,7 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
       .catch(function(err) {
         var s = document.getElementById('statusMsg');
         s.className = 'error';
-        s.innerHTML = '&#10007; ' + (err.message || 'Submission failed. Please try again.') +
-          '<br><small style="display:block;margin-top:6px;opacity:.8">Tip: on first use, check ' + RECIPIENT + ' for a FormSubmit activation email and click the confirmation link.</small>';
+        s.innerHTML = '&#10007; ' + (err.message || 'Submission failed. Please try again.');
         s.style.display = 'block';
         s.scrollIntoView({ behavior: 'smooth' });
         btn.disabled = false;
