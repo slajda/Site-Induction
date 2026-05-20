@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>Antvic — Site Induction</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/smtpjs@3.1.4/src/smtp.js"></script>
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5}
+:root{
+  --or:#E8650A;--ord:#C4540A;--orl:#FEF3EC;--orll:#FFF8F4;
+  --ch:#1E1E1C;--ch2:#2A2A28;--ch3:#363634;
+  --bg:#F0EFE9;--sf:#FFFFFF;--sf2:#F8F7F4;--sf3:#F2F1ED;
+  --bd:#E2E0DA;--bd2:#CCCAC4;--bd3:#B0AEA8;
+  --tx:#18180E;--tx2:#52524E;--tx3:#86867E;
+  --gn:#2D7A3A;--gnl:#EAF3EC;
+  --rd:#C0392B;--rdl:#FDECEA;
+  --bl:#1565C0;--bll:#E3F0FF;
+  --am:#9A6F00;--aml:#FFF8E1;
+  --r:8px;--rl:12px;--rxl:16px;
+  --sb:224px;
+}
+
+/* ── APP SHELL ── */
+.app{display:flex;height:100%;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sb);flex-shrink:0;
+  background:var(--ch);
+  display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+  transition:width .25s ease;
+  z-index:30;
+}
+.sb-brand{padding:1.25rem 1rem 1rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+.sb-logo{width:34px;height:34px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px;flex-shrink:0}
+.sb-info{overflow:hidden}
+.sb-name{color:#fff;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-site{color:rgba(255,255,255,0.35);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-section{padding:.75rem 0 .25rem;flex-shrink:0}
+.sb-lbl{padding:0 1rem .35rem;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.28);white-space:nowrap;overflow:hidden}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:.6rem 1rem;cursor:pointer;
+  color:rgba(255,255,255,0.55);font-size:13px;
+  transition:all .15s;border-left:2px solid transparent;
+  white-space:nowrap;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,0.06)}
+.sb-item.active{color:#fff;background:rgba(232,101,10,0.18);border-left-color:var(--or)}
+.sb-item i{font-size:17px;flex-shrink:0}
+.sb-item-label{overflow:hidden;text-overflow:ellipsis}
+.sb-badge{margin-left:auto;background:var(--or);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;flex-shrink:0}
+.sb-footer{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+.sb-footer-text{color:rgba(255,255,255,0.25);font-size:11px;line-height:1.6;white-space:nowrap;overflow:hidden}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:52px;background:var(--sf);border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;padding:0 1.25rem;gap:10px;
+  flex-shrink:0;z-index:20;
+}
+.tb-hamburger{display:none;width:32px;height:32px;border-radius:var(--r);border:1px solid var(--bd);background:none;cursor:pointer;align-items:center;justify-content:center;font-size:16px;color:var(--tx2)}
+.tb-title{font-size:15px;font-weight:600;color:var(--tx)}
+.tb-sub{font-size:12px;color:var(--tx3);margin-top:1px}
+.tb-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;overflow-x:hidden}
+.page{display:none;padding:1.25rem;min-height:100%}
+.page.active{display:block}
+
+/* ── PIN OVERLAY ── */
+.pin-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
+  z-index:100;align-items:center;justify-content:center;padding:1.5rem;
+  backdrop-filter:blur(4px);
+}
+.pin-overlay.open{display:flex}
+.pin-card{
+  background:var(--sf);border-radius:var(--rxl);
+  width:100%;max-width:340px;padding:2rem 1.75rem;text-align:center;
+}
+.pin-logo{width:48px;height:48px;background:var(--or);border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:20px;margin:0 auto .875rem}
+.pin-title{font-size:17px;font-weight:700;margin-bottom:3px}
+.pin-sub{font-size:13px;color:var(--tx3);margin-bottom:1.25rem}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:1.25rem}
+.pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--bd2);transition:all .15s}
+.pin-dot.filled{background:var(--or);border-color:var(--or)}
+.pin-dot.error{background:var(--rd);border-color:var(--rd)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:.875rem}
+.pin-key{
+  height:54px;border-radius:var(--r);border:1.5px solid var(--bd);
+  background:var(--sf);font-size:18px;font-weight:600;
+  cursor:pointer;font-family:inherit;color:var(--tx);
+  transition:all .12s;-webkit-tap-highlight-color:transparent;
+}
+.pin-key:hover{background:var(--sf2);border-color:var(--bd2)}
+.pin-key:active{background:var(--sf3);transform:scale(.95)}
+.pin-key.del{font-size:14px;color:var(--tx3)}
+.pin-err{color:var(--rd);font-size:13px;height:16px}
+.pin-cancel{background:none;border:none;color:var(--tx3);font-size:13px;cursor:pointer;font-family:inherit;margin-top:.5rem;padding:4px 8px}
+.pin-cancel:hover{color:var(--tx)}
+
+/* ── MOBILE NAV ── */
+.mobile-nav{
+  display:none;background:var(--sf);border-top:1px solid var(--bd);
+  flex-shrink:0;
+}
+.mobile-nav-inner{display:flex}
+.mn-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:.6rem .5rem .5rem;cursor:pointer;color:var(--tx3);
+  font-size:10.5px;font-weight:500;gap:3px;transition:color .15s;
+  -webkit-tap-highlight-color:transparent;border:none;background:none;font-family:inherit;
+}
+.mn-item i{font-size:20px}
+.mn-item.active{color:var(--or)}
+.mn-badge{background:var(--or);color:#fff;border-radius:99px;padding:1px 5px;font-size:9px;font-weight:700;position:absolute;top:-3px;right:-4px}
+.mn-icon-wrap{position:relative}
+
+/* ── SIDEBAR OVERLAY (mobile) ── */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:29}
+.sb-overlay.open{display:block}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-var(--sb);left:calc(-1 * var(--sb));top:0;bottom:0;transform:translateX(0);z-index:30}
+  .sidebar.open{transform:translateX(var(--sb))}
+  .tb-hamburger{display:flex}
+  .mobile-nav{display:block}
+  .page{padding:1rem}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .fg{grid-template-columns:1fr}
+  .dg{grid-template-columns:1fr}
+}
+
+/* ── BUTTONS ── */
+.btn{height:38px;padding:0 1.1rem;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;border:none;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn-primary{background:var(--or);color:#fff}.btn-primary:hover{background:var(--ord)}
+.btn-ghost{background:var(--sf);color:var(--tx2);border:1px solid var(--bd2)}.btn-ghost:hover{background:var(--sf2)}
+.btn-success{background:var(--gn);color:#fff}.btn-success:hover{filter:brightness(.92)}
+.btn-danger{background:var(--rdl);color:var(--rd);border:1px solid rgba(192,57,43,.18)}
+.btn-sm{height:30px;padding:0 .75rem;font-size:12px}
+.btn-lg{height:44px;padding:0 1.4rem;font-size:14px;font-weight:600}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-full{width:100%;justify-content:center}
+
+/* ── CARDS ── */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1.1rem 1.25rem;margin-bottom:1rem}
+.card:last-child{margin-bottom:0}
+.shd{font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--or);text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-bottom:.875rem}
+.shd i{font-size:14px}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.stat{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1rem 1.1rem;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.stat-a::before{background:var(--or)}.stat-b::before{background:var(--bl)}.stat-c::before{background:var(--gn)}.stat-d::before{background:var(--am)}
+.stat-val{font-size:26px;font-weight:700;line-height:1;color:var(--tx)}
+.stat-lbl{font-size:12px;color:var(--tx3);margin-top:4px}
+
+/* ── TABLE ── */
+.tcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.ttb{padding:.75rem 1rem;border-bottom:1px solid var(--bd);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ttb input,.ttb select{height:32px;border:1px solid var(--bd2);border-radius:var(--r);padding:0 9px;font-size:12.5px;font-family:inherit;background:var(--sf2);color:var(--tx);outline:none}
+.ttb input{min-width:160px;flex:1}.ttb input:focus,.ttb select:focus{border-color:var(--or)}
+.tbl-actions{margin-left:auto;display:flex;gap:6px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:580px}
+th{background:var(--sf3);color:var(--tx3);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--bd)}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--bd);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--sf2)}
+.wname{font-weight:600;font-size:13.5px;color:var(--tx)}
+.wref{font-size:11px;color:var(--tx3);margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:3px;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:500}
+.b-tr{background:var(--sf3);color:var(--tx2);border:1px solid var(--bd)}
+.b-new{background:var(--bll);color:var(--bl)}
+.b-ok{background:var(--gnl);color:var(--gn)}
+.b-flag{background:var(--rdl);color:var(--rd)}
+.b-or{background:var(--orl);color:var(--ord)}
+.row-act{display:flex;gap:3px}
+.ib{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;color:var(--tx3)}
+.ib:hover{border-color:var(--or);color:var(--or);background:var(--orl)}
+.ib-del:hover{border-color:var(--rd);color:var(--rd);background:var(--rdl)}
+.empty-state{padding:3rem 1rem;text-align:center;color:var(--tx3)}
+.empty-state i{font-size:36px;display:block;margin-bottom:.75rem;opacity:.35}
+.empty-title{font-size:14px;font-weight:500;color:var(--tx2);margin-bottom:.25rem}
+.empty-sub{font-size:13px}
+
+/* ── FORM ── */
+.form-wrap{max-width:580px;margin:0 auto}
+.fhdr{background:var(--ch);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1.1rem}
+.fhdr-top{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.fhdr-logo{width:34px;height:34px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px;flex-shrink:0}
+.fhdr-co{color:rgba(255,255,255,.6);font-size:13px}
+.fhdr-title{color:#fff;font-size:18px;font-weight:700;margin-bottom:3px}
+.fhdr-sub{color:rgba(255,255,255,.38);font-size:12px;line-height:1.5}
+.prog{display:flex;gap:3px;margin-top:.875rem}
+.ps{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.15);transition:background .3s}
+.ps.active{background:var(--or)}.ps.done{background:rgba(255,255,255,.45)}
+.fsec{display:none}.fsec.visible{display:block}
+.nb{border-radius:0 var(--r) var(--r) 0;padding:.65rem .875rem;margin-bottom:.875rem;font-size:13px;line-height:1.55}
+.nb-w{background:var(--orl);border-left:3px solid var(--or)}
+.nb-i{background:var(--bll);border-left:3px solid var(--bl)}
+.fi{margin-bottom:.8rem}.fi:last-child{margin-bottom:0}
+.fl{display:block;font-size:12px;color:var(--tx2);margin-bottom:4px;font-weight:500}
+.fl .rq{color:var(--or)}
+.fi input,.fi select,.fi textarea{width:100%;padding:0 11px;height:40px;border:1.5px solid var(--bd2);border-radius:var(--r);background:var(--sf2);color:var(--tx);font-size:13.5px;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(232,101,10,.1)}
+.fi textarea{height:76px;padding:9px 11px;resize:vertical}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ckg{display:flex;flex-direction:column;gap:9px}
+.cki{display:flex;align-items:flex-start;gap:9px;cursor:pointer;padding:2px 0}
+.cki input[type=checkbox]{margin-top:3px;accent-color:var(--or);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.cki span{font-size:13.5px;line-height:1.55;color:var(--tx)}
+.rr{display:flex;gap:1.25rem;margin-top:5px}
+.ri{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13.5px}
+.ri input[type=radio]{accent-color:var(--or);width:16px;height:16px;cursor:pointer}
+.uz{border:2px dashed var(--bd2);border-radius:var(--rl);padding:1.5rem 1rem;text-align:center;cursor:pointer;background:var(--sf2);transition:all .2s;position:relative}
+.uz:hover,.uz.dov{border-color:var(--or);background:var(--orl)}
+.uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-icon{font-size:28px;color:var(--tx3);margin-bottom:6px}
+.uz-lbl{font-size:13px;color:var(--tx3);line-height:1.5}
+.uz-lbl strong{color:var(--or)}
+.ufiles{margin-top:.75rem;display:flex;flex-direction:column;gap:6px}
+.uf{display:flex;align-items:center;gap:8px;background:var(--gnl);border:1px solid rgba(45,122,58,.2);border-radius:var(--r);padding:7px 10px}
+.uf i{font-size:17px;color:var(--gn);flex-shrink:0}
+.ufn{flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ufs{font-size:11px;color:var(--tx3);flex-shrink:0}
+.ufr{background:none;border:none;color:var(--rd);cursor:pointer;font-size:15px;padding:0 2px;line-height:1}
+.uprog{margin-top:6px;height:3px;background:var(--bd);border-radius:2px;overflow:hidden;display:none}
+.uprog-bar{height:100%;background:var(--or);border-radius:2px;transition:width .3s;width:0}
+.sw{border:1.5px solid var(--bd2);border-radius:var(--r);overflow:hidden}
+.sc{display:block;width:100%;height:120px;cursor:crosshair;background:var(--sf2);touch-action:none}
+.sf_{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-top:1px solid var(--bd);background:var(--sf2)}
+.sh{font-size:11.5px;color:var(--tx3)}
+.fnav{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;gap:8px}
+.step-ind{font-size:12px;color:var(--tx3);text-align:center}
+.sc-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:2.5rem 1.5rem;text-align:center}
+.sc-icon{width:56px;height:56px;border-radius:50%;background:var(--gnl);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:26px;color:var(--gn)}
+.sc-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.sc-sub{font-size:13.5px;color:var(--tx3);max-width:360px;margin:0 auto 1.25rem;line-height:1.6}
+.ref-pill{display:inline-block;background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);padding:6px 18px;font-size:13.5px;font-family:'Courier New',monospace;color:var(--tx2);letter-spacing:.06em}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:600px){.overlay{align-items:center;padding:1.5rem}}
+.overlay.open{display:flex}
+.modal{background:var(--sf);width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--rxl) var(--rxl) 0 0}
+@media(min-width:600px){.modal{border-radius:var(--rxl);max-height:88vh}}
+.mh{background:var(--ch);padding:1rem 1.25rem;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mhi{width:30px;height:30px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.mt{color:#fff;font-weight:600;font-size:14.5px}
+.mr_{color:rgba(255,255,255,.4);font-size:11.5px;margin-top:1px}
+.mc{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;padding:4px;border-radius:4px;line-height:1}
+.mc:hover{color:#fff}
+.mb_{overflow-y:auto;padding:1.25rem;flex:1}
+.mf{padding:.875rem 1.25rem;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;background:var(--sf2);flex-shrink:0;flex-wrap:wrap}
+.ds{margin-bottom:1.1rem}
+.dt{font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--or);text-transform:uppercase;margin-bottom:.5rem;padding-bottom:.35rem;border-bottom:1px solid var(--bd)}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+@media(max-width:500px){.dg{grid-template-columns:1fr}}
+.df label{font-size:11px;color:var(--tx3);display:block;margin-bottom:1px}
+.df span{font-size:13.5px;color:var(--tx);font-weight:500}
+.df-full{grid-column:1/-1}
+.hs-row{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--tx2);padding:3px 0}
+.hs-row i{font-size:14px;flex-shrink:0;margin-top:1px}
+.fl-list{display:flex;flex-direction:column;gap:5px}
+.fl-row{display:flex;align-items:center;gap:8px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 10px}
+.fl-row i{font-size:18px;color:var(--tx3);flex-shrink:0}
+.fl-name{flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fl-size{font-size:11px;color:var(--tx3)}
+.fl-btn{background:var(--or);color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0}
+
+/* ── SETTINGS ── */
+.set-section{margin-bottom:1.5rem}
+.set-title{font-size:15px;font-weight:600;margin-bottom:.2rem}
+.set-sub{font-size:13px;color:var(--tx3);margin-bottom:.875rem}
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:.65rem 0;border-bottom:1px solid var(--bd)}
+.set-row:last-child{border-bottom:none}
+.srl{font-size:13.5px;color:var(--tx)}.srs{font-size:12px;color:var(--tx3);margin-top:1px}
+.tgl{position:relative;width:40px;height:22px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgls{position:absolute;inset:0;background:var(--bd2);border-radius:99px;cursor:pointer;transition:.2s}
+.tgls::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tgl input:checked+.tgls{background:var(--or)}
+.tgl input:checked+.tgls::before{transform:translateX(18px)}
+.ci{width:100%;padding:0 11px;height:38px;border:1.5px solid var(--bd2);border-radius:var(--r);background:var(--sf2);color:var(--tx);font-size:13.5px;font-family:inherit;outline:none;margin-top:5px;-webkit-appearance:none}
+.ci:focus{border-color:var(--or)}
+.proj-list{display:flex;flex-direction:column;gap:6px;margin-bottom:.75rem}
+.proj-item{display:flex;align-items:center;gap:8px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 10px}
+.proj-name{flex:1;font-size:13.5px;font-weight:500}
+.proj-rm{background:none;border:none;color:var(--rd);cursor:pointer;font-size:15px;padding:0 2px}
+.add-row{display:flex;gap:8px}
+.add-row input{flex:1;height:36px;border:1.5px solid var(--bd2);border-radius:var(--r);padding:0 10px;font-size:13px;font-family:inherit;background:var(--sf2);color:var(--tx);outline:none}
+.add-row input:focus{border-color:var(--or)}
+.step-list{display:flex;flex-direction:column;gap:.75rem;margin:.75rem 0}
+.step-item{display:flex;gap:10px;align-items:flex-start}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--or);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-tx{font-size:13.5px;color:var(--tx);line-height:1.55}
+.step-tx code{background:var(--sf3);border:1px solid var(--bd);border-radius:4px;padding:1px 5px;font-size:11.5px;font-family:'Courier New',monospace}
+.drive-st{display:flex;align-items:center;gap:8px;padding:.7rem .875rem;border-radius:var(--r);font-size:13px;font-weight:500;margin-bottom:.875rem}
+.drive-st.conn{background:var(--gnl);color:var(--gn);border:1px solid rgba(45,122,58,.2)}
+.drive-st.disc{background:var(--orl);color:var(--ord);border:1px solid rgba(232,101,10,.2)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%);padding:.55rem 1.1rem;border-radius:var(--r);font-size:13px;font-weight:500;z-index:999;transition:opacity .3s;color:#fff;white-space:nowrap;pointer-events:none;opacity:0}
+@media(min-width:769px){#toast{bottom:1.25rem}}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══ SIDEBAR ══ -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">A</div>
+      <div class="sb-info">
+        <div class="sb-name">Antvic Ltd</div>
+        <div class="sb-site">Caldecotte Lake · MK</div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-lbl">Worker</div>
+      <div class="sb-item active" id="snav-induction" onclick="navTo('induction')">
+        <i class="ti ti-clipboard-plus" aria-hidden="true"></i>
+        <span class="sb-item-label">New Induction</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-lbl">Admin</div>
+      <div class="sb-item" id="snav-dashboard" onclick="navTo('dashboard')">
+        <i class="ti ti-layout-dashboard" aria-hidden="true"></i>
+        <span class="sb-item-label">Dashboard</span>
+        <span class="sb-badge" id="sideCount">0</span>
+      </div>
+      <div class="sb-item" id="snav-settings" onclick="navTo('settings')">
+        <i class="ti ti-settings" aria-hidden="true"></i>
+        <span class="sb-item-label">Settings</span>
+      </div>
+      <div class="sb-item" id="snav-email" onclick="navTo('email')">
+        <i class="ti ti-mail" aria-hidden="true"></i>
+        <span class="sb-item-label">Email & Drive</span>
+      </div>
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-footer-text">Site Induction System<br>v3.0 · Antvic Ltd</div>
+    </div>
+  </nav>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <button class="tb-hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+        <i class="ti ti-menu-2" aria-hidden="true"></i>
+      </button>
+      <div>
+        <div class="tb-title" id="tbTitle">New Induction</div>
+        <div class="tb-sub" id="tbSub">Caldecotte Lake Business Park · Antvic Ltd</div>
+      </div>
+      <div class="tb-actions" id="tbActions"></div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content" id="content">
+
+      <!-- ══ INDUCTION FORM ══ -->
+      <div class="page active" id="page-induction">
+        <div class="form-wrap">
+          <div class="fhdr">
+            <div class="fhdr-top"><div class="fhdr-logo">A</div><span class="fhdr-co">Antvic Ltd</span></div>
+            <div class="fhdr-title">Site Induction Form</div>
+            <div class="fhdr-sub">Complete all 6 sections · Your documents are saved securely to Google Drive</div>
+            <div class="prog">
+              <div class="ps active" id="ps1"></div><div class="ps" id="ps2"></div>
+              <div class="ps" id="ps3"></div><div class="ps" id="ps4"></div>
+              <div class="ps" id="ps5"></div><div class="ps" id="ps6"></div>
+            </div>
+          </div>
+
+          <!-- Step 1 -->
+          <div class="fsec visible" id="fs1">
+            <div class="card">
+              <div class="shd"><i class="ti ti-user" aria-hidden="true"></i>Personal details</div>
+              <div class="fg">
+                <div class="fi"><label class="fl">First name <span class="rq">*</span></label><input type="text" id="fname" placeholder="John" autocomplete="given-name"/></div>
+                <div class="fi"><label class="fl">Last name <span class="rq">*</span></label><input type="text" id="lname" placeholder="Smith" autocomplete="family-name"/></div>
+              </div>
+              <div class="fg">
+                <div class="fi"><label class="fl">Date of birth <span class="rq">*</span></label><input type="date" id="dob"/></div>
+                <div class="fi"><label class="fl">National Insurance No.</label><input type="text" id="ni" placeholder="AB 12 34 56 C"/></div>
+              </div>
+              <div class="fg">
+                <div class="fi"><label class="fl">Mobile <span class="rq">*</span></label><input type="tel" id="mobile" placeholder="+44 7700 000000"/></div>
+                <div class="fi"><label class="fl">Email <span class="rq">*</span></label><input type="email" id="email" placeholder="john@email.com"/></div>
+              </div>
+              <div class="fg">
+                <div class="fi"><label class="fl">Emergency contact name <span class="rq">*</span></label><input type="text" id="ecname"/></div>
+                <div class="fi"><label class="fl">Emergency contact phone <span class="rq">*</span></label><input type="tel" id="ectel"/></div>
+              </div>
+              <div class="fi"><label class="fl">Employer / company <span class="rq">*</span></label><input type="text" id="employer" placeholder="Subcontractor Ltd"/></div>
+              <div class="fg">
+                <div class="fi"><label class="fl">Trade / role <span class="rq">*</span></label>
+                  <select id="trade"><option value="">— select —</option><option>Bricklayer</option><option>Carpenter / joiner</option><option>Electrician</option><option>Plumber / mechanical</option><option>Plasterer</option><option>Painter / decorator</option><option>Groundworker</option><option>Steel fixer</option><option>Plant operator</option><option>Labourer</option><option>Site manager / supervisor</option><option>Other</option></select>
+                </div>
+                <div class="fi"><label class="fl">Start date on site <span class="rq">*</span></label><input type="date" id="startdate"/></div>
+              </div>
+              <div class="fi"><label class="fl">Project / site <span class="rq">*</span></label><select id="project"><option value="">— select project —</option></select></div>
+            </div>
+            <div class="fnav"><span></span><span class="step-ind">Step 1 of 6</span><button class="btn btn-primary" onclick="goTo(2)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="fsec" id="fs2">
+            <div class="card">
+              <div class="shd"><i class="ti ti-certificate" aria-hidden="true"></i>Qualifications & right to work</div>
+              <div class="fi"><label class="fl">CSCS card type <span class="rq">*</span></label>
+                <select id="cscs_type"><option value="">— select —</option><option>Green — Labourer</option><option>Blue — Skilled Worker</option><option>Gold — Supervisor</option><option>Black — Manager</option><option>White — Academically qualified</option><option>Red — Trainee</option><option>No card held</option></select>
+              </div>
+              <div class="fg">
+                <div class="fi"><label class="fl">CSCS card number</label><input type="text" id="cscs_num"/></div>
+                <div class="fi"><label class="fl">CSCS expiry date</label><input type="date" id="cscs_exp"/></div>
+              </div>
+              <div class="fi"><label class="fl">Additional cards / tickets (tick all that apply)</label>
+                <div class="ckg" style="margin-top:7px">
+                  <label class="cki"><input type="checkbox" class="card-cb"/><span>CPCS (plant operations)</span></label>
+                  <label class="cki"><input type="checkbox" class="card-cb"/><span>IPAF (powered access)</span></label>
+                  <label class="cki"><input type="checkbox" class="card-cb"/><span>PASMA (mobile scaffold towers)</span></label>
+                  <label class="cki"><input type="checkbox" class="card-cb"/><span>First Aid at Work (FAW)</span></label>
+                  <label class="cki"><input type="checkbox" class="card-cb"/><span>Asbestos awareness (Cat A)</span></label>
+                  <label class="cki"><input type="checkbox" class="card-cb"/><span>Manual handling</span></label>
+                  <label class="cki"><input type="checkbox" class="card-cb"/><span>Working at height</span></label>
+                </div>
+              </div>
+              <div class="fi"><label class="fl">Legal right to work in the UK? <span class="rq">*</span></label>
+                <div class="rr"><label class="ri"><input type="radio" name="rtw" value="Yes"/> Yes</label><label class="ri"><input type="radio" name="rtw" value="No"/> No</label></div>
+              </div>
+              <div class="fi"><label class="fl">ID document provided to site manager <span class="rq">*</span></label>
+                <select id="id_type"><option value="">— select —</option><option>UK Passport</option><option>Non-UK Passport + Visa / BRP</option><option>UK Driving Licence</option><option>Biometric Residence Permit</option><option>Share code</option><option>Other</option></select>
+              </div>
+            </div>
+            <div class="card">
+              <div class="shd"><i class="ti ti-paperclip" aria-hidden="true"></i>Upload documents & photos</div>
+              <div class="nb nb-i">Upload your ID, CSCS card, certificates, and photos. Files saved to Google Drive. Max 10MB each.</div>
+              <div class="uz" id="uploadZone">
+                <input type="file" id="fileInput" multiple accept="image/*,.pdf" onchange="handleFiles(this.files)"/>
+                <div class="uz-icon"><i class="ti ti-cloud-upload" aria-hidden="true"></i></div>
+                <div class="uz-lbl"><strong>Tap to upload</strong> or drag and drop<br>Photos · PDFs · ID · CSCS card · certificates</div>
+              </div>
+              <div class="uprog" id="uprog"><div class="uprog-bar" id="uprog-bar"></div></div>
+              <div class="ufiles" id="uploadedFiles"></div>
+            </div>
+            <div class="fnav"><button class="btn btn-ghost" onclick="goTo(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="step-ind">Step 2 of 6</span><button class="btn btn-primary" onclick="goTo(3)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="fsec" id="fs3">
+            <div class="card">
+              <div class="shd"><i class="ti ti-shield-check" aria-hidden="true"></i>Health & safety rules</div>
+              <div class="nb nb-w">Read each statement. Tick every box to confirm you understand and will comply.</div>
+              <p style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:.875rem">I confirm I understand and will comply with all of the following: <span style="color:var(--or)">*</span></p>
+              <div class="ckg">
+                <label class="cki"><input type="checkbox" class="hs"/><span>I have been briefed on site-specific RAMS relevant to my scope of work.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I will wear required PPE at all times: hard hat, hi-vis vest (min. class 2), safety boots (steel toe &amp; midsole), gloves, and safety glasses / RPE where required.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I will not enter any area not designated safe or beyond my authorised access level.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I understand all site exclusion zones, barriers, and signage and will comply at all times.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I will report unsafe conditions, near misses, incidents, or accidents immediately to the site manager.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I will not use a mobile phone or headphones in active work areas or when operating plant and machinery.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I am not under the influence of alcohol, drugs, or any substance that may impair my judgement. These are strictly prohibited on site.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I will keep my work area clean and dispose of all waste in designated skips/bins.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I will not carry out any task for which I am not trained, instructed, or hold the required qualification.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I have received a fire evacuation briefing and know the location of fire points, extinguishers, and the assembly point.</span></label>
+                <label class="cki"><input type="checkbox" class="hs"/><span>I understand toolbox talks are mandatory and will attend all relevant sessions.</span></label>
+              </div>
+            </div>
+            <div class="fnav"><button class="btn btn-ghost" onclick="goTo(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="step-ind">Step 3 of 6</span><button class="btn btn-primary" onclick="goTo(4)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="fsec" id="fs4">
+            <div class="card">
+              <div class="shd"><i class="ti ti-first-aid-kit" aria-hidden="true"></i>Health declarations</div>
+              <div class="fi"><label class="fl">Medical conditions affecting safe working? <span class="rq">*</span></label>
+                <div class="rr"><label class="ri"><input type="radio" name="med" value="Yes"/> Yes</label><label class="ri"><input type="radio" name="med" value="No"/> No</label></div>
+              </div>
+              <div class="fi"><label class="fl">If yes, brief details (kept strictly confidential)</label><textarea id="med_detail" placeholder="e.g. epilepsy, diabetes, hearing impairment..."></textarea></div>
+              <div class="fi"><label class="fl">Allergies we should be aware of? <span class="rq">*</span></label>
+                <div class="rr"><label class="ri"><input type="radio" name="allergy" value="Yes"/> Yes</label><label class="ri"><input type="radio" name="allergy" value="No"/> No</label></div>
+              </div>
+              <div class="fi"><label class="fl">If yes, please specify</label><input type="text" id="allergy_detail" placeholder="e.g. latex, dust, penicillin"/></div>
+            </div>
+            <div class="card">
+              <div class="shd"><i class="ti ti-map-pin" aria-hidden="true"></i>Site rules & conduct</div>
+              <div class="ckg">
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will sign in and out of the site register every day without exception.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I understand site hours: Mon–Fri 07:30–18:00, Sat 08:00–13:00, unless otherwise agreed in writing.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will not permit any unauthorised person to enter the site.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will park only in designated areas. Site speed limit is 5mph.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will treat all workers, staff, and visitors with respect. Bullying or harassment will result in immediate removal.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will not take photographs or video on site without prior written authorisation.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will not remove any materials, tools, or equipment without authorisation.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will segregate waste correctly into designated containers.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I will not pour liquids, paints, solvents, or chemicals into drains or onto the ground.</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I am aware of site toilets, welfare, first aid station, and fire assembly point (Car park — south gate).</span></label>
+                <label class="cki"><input type="checkbox" class="sr"/><span>I have been shown the fire assembly point and understand the evacuation procedure.</span></label>
+              </div>
+            </div>
+            <div class="fnav"><button class="btn btn-ghost" onclick="goTo(3)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="step-ind">Step 4 of 6</span><button class="btn btn-primary" onclick="goTo(5)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="fsec" id="fs5">
+            <div class="card">
+              <div class="shd"><i class="ti ti-writing" aria-hidden="true"></i>Declaration & signature</div>
+              <div class="nb nb-w">By signing below I confirm I have read, understood, and agree to comply with all site rules and H&S requirements. This induction does not replace any specific RAMS briefing for my scope of work.</div>
+              <div class="fi"><label class="fl">Full name (as declaration) <span class="rq">*</span></label><input type="text" id="decl_name" placeholder="John Smith"/></div>
+              <div class="fi"><label class="fl">Date <span class="rq">*</span></label><input type="date" id="decl_date"/></div>
+              <div class="fi"><label class="fl">Signature <span class="rq">*</span></label>
+                <div class="sw">
+                  <canvas class="sc" id="sigCanvas" width="560" height="120"></canvas>
+                  <div class="sf_"><span class="sh">Draw with finger, stylus, or mouse</span><button class="btn btn-ghost btn-sm" onclick="clearSig()"><i class="ti ti-refresh" aria-hidden="true"></i> Clear</button></div>
+                </div>
+              </div>
+              <div class="fi"><label class="fl">Additional comments for site team</label><textarea id="comments" placeholder="Anything the site manager should know..."></textarea></div>
+            </div>
+            <div class="fnav"><button class="btn btn-ghost" onclick="goTo(4)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="step-ind">Step 5 of 6</span><button class="btn btn-primary" onclick="goTo(6)">Review <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+          </div>
+
+          <!-- Step 6 -->
+          <div class="fsec" id="fs6">
+            <div class="card"><div class="shd"><i class="ti ti-eye" aria-hidden="true"></i>Review & submit</div><div id="reviewContent"></div></div>
+            <div class="fnav"><button class="btn btn-ghost" onclick="goTo(5)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="step-ind">Step 6 of 6</span><button class="btn btn-success btn-lg" id="submitBtn" onclick="submitForm()"><i class="ti ti-check" aria-hidden="true"></i> Submit Induction</button></div>
+          </div>
+
+          <!-- Success -->
+          <div class="fsec" id="fsSuccess">
+            <div class="sc-card">
+              <div class="sc-icon"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+              <div class="sc-title">Induction complete</div>
+              <div class="sc-sub">Your induction has been recorded and your documents uploaded. Please report to the site office to collect your worker pass.</div>
+              <div class="ref-pill" id="refCode">ATV-MK-0000</div>
+              <p style="font-size:12px;color:var(--tx3);margin-top:.875rem;margin-bottom:1.5rem">Caldecotte Lake Business Park — <span id="doneDate"></span></p>
+              <div style="display:flex;flex-direction:column;gap:8px;max-width:260px;margin:0 auto">
+                <button class="btn btn-primary btn-full btn-lg" onclick="downloadMyPDF()"><i class="ti ti-download" aria-hidden="true"></i> Download my PDF</button>
+                <button class="btn btn-ghost btn-full" onclick="resetForm()">Submit another induction</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="page" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat stat-a"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total inductions</div></div>
+          <div class="stat stat-b"><div class="stat-val" id="statToday">0</div><div class="stat-lbl">Today</div></div>
+          <div class="stat stat-c"><div class="stat-val" id="statWeek">0</div><div class="stat-lbl">This week</div></div>
+          <div class="stat stat-d"><div class="stat-val" id="statFiles">0</div><div class="stat-lbl">Files uploaded</div></div>
+        </div>
+        <div class="tcard">
+          <div class="ttb">
+            <input type="text" id="searchInput" placeholder="Search name, trade, employer, ref..." oninput="renderTable()"/>
+            <select id="filterProject" onchange="renderTable()"><option value="">All projects</option></select>
+            <select id="filterTrade" onchange="renderTable()"><option value="">All trades</option><option>Bricklayer</option><option>Carpenter / joiner</option><option>Electrician</option><option>Plumber / mechanical</option><option>Plasterer</option><option>Painter / decorator</option><option>Groundworker</option><option>Steel fixer</option><option>Plant operator</option><option>Labourer</option><option>Site manager / supervisor</option><option>Other</option></select>
+            <select id="filterStatus" onchange="renderTable()"><option value="">All statuses</option><option value="new">New</option><option value="ok">Approved</option><option value="flag">Flagged</option></select>
+            <div class="tbl-actions">
+              <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i class="ti ti-x" aria-hidden="true"></i></button>
+              <button class="btn btn-ghost btn-sm" onclick="exportAllPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> PDFs</button>
+              <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i> CSV</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Worker</th><th>Project</th><th>Trade</th><th>Employer</th><th>Submitted</th><th>Files</th><th>H&S</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SETTINGS ══ -->
+      <div class="page" id="page-settings">
+        <div style="max-width:600px">
+          <div class="set-section">
+            <div class="set-title">Projects</div>
+            <div class="set-sub">Projects appear on the worker form and become Google Drive subfolders.</div>
+            <div class="card">
+              <div class="proj-list" id="projList"></div>
+              <div class="add-row">
+                <input type="text" id="newProjInput" placeholder="e.g. Caldecotte Lake Building 1" onkeydown="if(event.key==='Enter')addProject()"/>
+                <button class="btn btn-primary btn-sm" onclick="addProject()"><i class="ti ti-plus" aria-hidden="true"></i> Add</button>
+              </div>
+            </div>
+          </div>
+          <div class="set-section">
+            <div class="set-title">General</div>
+            <div class="set-sub">Notification and access settings.</div>
+            <div class="card">
+              <div class="fi"><label class="fl">Notification email</label><input class="ci" type="email" id="cfg_email" placeholder="slajda@gmail.com" value="slajda@gmail.com"/></div>
+              <div class="fi" style="margin-top:.75rem"><label class="fl">Admin PIN (4 digits) — default is 1234</label><input class="ci" type="password" id="cfg_pin" placeholder="Enter new PIN to change" maxlength="4" pattern="[0-9]{4}"/></div>
+              <div style="margin-top:.875rem">
+                <div class="set-row" style="border-top:1px solid var(--bd);padding-top:.65rem">
+                  <div><div class="srl">Email notification on submission</div><div class="srs">Requires Gmail setup below</div></div>
+                  <label class="tgl"><input type="checkbox" id="tog_email" checked/><span class="tgls"></span></label>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" style="margin-top:.875rem" onclick="saveSettings()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save settings</button>
+            </div>
+          </div>
+          <div class="set-section">
+            <div class="set-title">Data management</div>
+            <div class="set-sub">All submission records stored locally in this browser. Export regularly.</div>
+            <div class="card" style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="ti ti-table-export" aria-hidden="true"></i> Export CSV</button>
+              <button class="btn btn-ghost btn-sm" onclick="exportJSON()"><i class="ti ti-code" aria-hidden="true"></i> Export JSON</button>
+              <button class="btn btn-ghost btn-sm" onclick="exportAllPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> Export all PDFs</button>
+              <button class="btn btn-danger btn-sm" onclick="clearAll()"><i class="ti ti-trash" aria-hidden="true"></i> Clear all records</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ EMAIL & DRIVE ══ -->
+      <div class="page" id="page-email">
+        <div style="max-width:600px">
+          <div class="set-section">
+            <div class="set-title">Google Drive</div>
+            <div class="set-sub">Files saved to <strong>Inductions / [Project] / [Worker Ref] /</strong> automatically on submission.</div>
+            <div class="card">
+              <div class="drive-st disc" id="driveStatus"><i class="ti ti-alert-circle" aria-hidden="true"></i> Not connected — enter Client ID and click Connect</div>
+              <div class="step-list">
+                <div class="step-item"><div class="step-num">1</div><div class="step-tx">Go to <a href="https://console.cloud.google.com" target="_blank" style="color:var(--bl)">console.cloud.google.com</a> → New project → <code>Antvic Induction</code></div></div>
+                <div class="step-item"><div class="step-num">2</div><div class="step-tx">APIs &amp; Services → Enable APIs → <code>Google Drive API</code> → Enable</div></div>
+                <div class="step-item"><div class="step-num">3</div><div class="step-tx">Credentials → OAuth Client ID → Web app → Authorised origin: <code>https://slajda.github.io</code></div></div>
+                <div class="step-item"><div class="step-num">4</div><div class="step-tx">Paste your Client ID below and click Connect</div></div>
+              </div>
+              <div class="fi"><label class="fl">Google Client ID</label><input class="ci" type="text" id="cfg_gdrive" placeholder="xxxx.apps.googleusercontent.com"/></div>
+              <div style="display:flex;gap:8px;margin-top:.875rem;flex-wrap:wrap">
+                <button class="btn btn-primary btn-sm" onclick="connectDrive()"><i class="ti ti-brand-google-drive" aria-hidden="true"></i> Connect Google Drive</button>
+                <button class="btn btn-ghost btn-sm" onclick="disconnectDrive()"><i class="ti ti-unlink" aria-hidden="true"></i> Disconnect</button>
+              </div>
+            </div>
+          </div>
+          <div class="set-section">
+            <div class="set-title">Gmail (via SMTP.js)</div>
+            <div class="set-sub">Send notifications from your Gmail — no backend needed. Requires a Gmail App Password.</div>
+            <div class="card">
+              <div class="step-list">
+                <div class="step-item"><div class="step-num">1</div><div class="step-tx">Google Account → Security → enable <strong>2-Step Verification</strong></div></div>
+                <div class="step-item"><div class="step-num">2</div><div class="step-tx"><a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--bl)">myaccount.google.com/apppasswords</a> → create App Password → name it <code>Antvic Induction</code></div></div>
+                <div class="step-item"><div class="step-num">3</div><div class="step-tx">Paste your Gmail address and the 16-character code below</div></div>
+              </div>
+              <div class="fg">
+                <div class="fi"><label class="fl">Gmail address</label><input class="ci" type="email" id="gmail_user" placeholder="slajda@gmail.com"/></div>
+                <div class="fi"><label class="fl">App password (16 chars)</label><input class="ci" type="password" id="gmail_pass" placeholder="abcdefghijklmnop"/></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:.875rem">
+                <button class="btn btn-primary btn-sm" onclick="saveGmail()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save & Test</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearGmail()"><i class="ti ti-trash" aria-hidden="true"></i> Clear</button>
+              </div>
+              <div id="gmailResult" style="margin-top:.75rem;font-size:13px;display:none"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="mobile-nav">
+      <div class="mobile-nav-inner">
+        <button class="mn-item active" id="mnav-induction" onclick="navTo('induction')">
+          <span class="mn-icon-wrap"><i class="ti ti-clipboard-plus" aria-hidden="true"></i></span>
+          <span>Induction</span>
+        </button>
+        <button class="mn-item" id="mnav-dashboard" onclick="navTo('dashboard')">
+          <span class="mn-icon-wrap"><i class="ti ti-layout-dashboard" aria-hidden="true"></i><span class="mn-badge" id="mobCount">0</span></span>
+          <span>Dashboard</span>
+        </button>
+        <button class="mn-item" id="mnav-settings" onclick="navTo('settings')">
+          <span class="mn-icon-wrap"><i class="ti ti-settings" aria-hidden="true"></i></span>
+          <span>Settings</span>
+        </button>
+        <button class="mn-item" id="mnav-email" onclick="navTo('email')">
+          <span class="mn-icon-wrap"><i class="ti ti-mail" aria-hidden="true"></i></span>
+          <span>Email & Drive</span>
+        </button>
+      </div>
+    </nav>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- PIN OVERLAY -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-card">
+    <div class="pin-logo">A</div>
+    <div class="pin-title">Admin access</div>
+    <div class="pin-sub">Enter your 4-digit PIN</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="dot0"></div>
+      <div class="pin-dot" id="dot1"></div>
+      <div class="pin-dot" id="dot2"></div>
+      <div class="pin-dot" id="dot3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" onclick="pinKey('0')" style="grid-column:2">0</button>
+      <button class="pin-key del" onclick="pinDel()"><i class="ti ti-backspace" aria-hidden="true"></i></button>
+    </div>
+    <div class="pin-err" id="pinErr"></div>
+    <button class="pin-cancel" onclick="cancelPin()">Cancel</button>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="detailModal">
+  <div class="modal">
+    <div class="mh">
+      <div class="mhi"><i class="ti ti-user" aria-hidden="true"></i></div>
+      <div><div class="mt" id="modalTitle">Worker record</div><div class="mr_" id="modalRef"></div></div>
+      <button class="mc" onclick="closeModal()"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="mb_" id="modalBody"></div>
+    <div class="mf">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary btn-sm" onclick="generatePDF(currentRecord)"><i class="ti ti-download" aria-hidden="true"></i> Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────
+let records = JSON.parse(localStorage.getItem('antvic_inductions') || '[]');
+let uploadedFiles = [];
+let currentStep = 1;
+let currentRecord = null;
+let lastSubmission = null;
+let driveToken = null;
+let pinBuffer = '';
+let pendingNav = null;
+const DEFAULT_PIN = '1234';
+const ADMIN_PAGES = ['dashboard','settings','email'];
+const cfg = () => JSON.parse(localStorage.getItem('antvic_cfg') || '{}');
+const getProjects = () => JSON.parse(localStorage.getItem('antvic_projects') || '["Caldecotte Lake Building 1","Caldecotte Lake Building 4"]');
+
+const PAGE_META = {
+  induction: { title:'New Induction', sub:'Caldecotte Lake Business Park · Antvic Ltd', actions:'' },
+  dashboard: { title:'Dashboard', sub:'All site induction records', actions:`<button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i> CSV</button><button class="btn btn-ghost btn-sm" onclick="exportAllPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> PDFs</button>` },
+  settings: { title:'Settings', sub:'Projects, PIN, and general preferences', actions:'' },
+  email: { title:'Email & Drive', sub:'Gmail notifications and Google Drive file storage', actions:'' },
+};
+
+// ── NAVIGATION ───────────────────────────────────────────────────────
+let currentPage = 'induction';
+
+function navTo(page) {
+  closeSidebar();
+  if (ADMIN_PAGES.includes(page)) {
+    pendingNav = page;
+    openPin();
+    return;
+  }
+  goPage(page);
+}
+
+function goPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const si = document.getElementById('snav-' + page);
+  if (si) si.classList.add('active');
+  document.querySelectorAll('.mn-item').forEach(i => i.classList.remove('active'));
+  const mi = document.getElementById('mnav-' + page);
+  if (mi) mi.classList.add('active');
+  const m = PAGE_META[page] || {};
+  document.getElementById('tbTitle').textContent = m.title || page;
+  document.getElementById('tbSub').textContent = m.sub || '';
+  document.getElementById('tbActions').innerHTML = m.actions || '';
+  document.getElementById('content').scrollTo(0, 0);
+  if (page === 'dashboard') { updateStats(); renderTable(); renderProjectFilter(); }
+  if (page === 'settings') { renderProjectList(); loadSettings(); }
+  if (page === 'email') { loadEmailSettings(); }
+}
+
+// ── SIDEBAR ──────────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('open');
+}
+
+// ── PIN ──────────────────────────────────────────────────────────────
+function openPin() {
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pinErr').textContent = '';
+  document.getElementById('pinOverlay').classList.add('open');
+}
+function cancelPin() {
+  document.getElementById('pinOverlay').classList.remove('open');
+  pendingNav = null;
+}
+function pinKey(k) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if (pinBuffer.length === 4) setTimeout(checkPin, 100);
+}
+function pinDel() { pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); }
+function updatePinDots(err=false) {
+  for (let i=0;i<4;i++) {
+    const d = document.getElementById('dot'+i);
+    d.classList.remove('filled','error');
+    if (err) d.classList.add('error');
+    else if (i < pinBuffer.length) d.classList.add('filled');
+  }
+}
+function checkPin() {
+  const correct = cfg().pin || DEFAULT_PIN;
+  if (pinBuffer === correct) {
+    document.getElementById('pinOverlay').classList.remove('open');
+    if (pendingNav) { goPage(pendingNav); pendingNav = null; }
+  } else {
+    updatePinDots(true);
+    document.getElementById('pinErr').textContent = 'Incorrect PIN';
+    setTimeout(() => { pinBuffer=''; updatePinDots(); document.getElementById('pinErr').textContent=''; }, 1200);
+  }
+}
+
+// ── FORM STEPS ───────────────────────────────────────────────────────
+function goTo(step) {
+  if (step > currentStep && !validateStep(currentStep)) return;
+  if (step === 6) buildReview();
+  document.getElementById('fs'+currentStep).classList.remove('visible');
+  currentStep = step;
+  document.getElementById('fs'+currentStep).classList.add('visible');
+  updateProgress();
+  document.getElementById('content').scrollTo(0,0);
+}
+function updateProgress() {
+  for (let i=1;i<=6;i++) {
+    const e = document.getElementById('ps'+i);
+    if (!e) continue;
+    e.classList.remove('active','done');
+    if (i<currentStep) e.classList.add('done');
+    if (i===currentStep) e.classList.add('active');
+  }
+}
+function validateStep(s) {
+  const req = {1:['fname','lname','dob','mobile','email','ecname','ectel','employer','trade','startdate','project'],5:['decl_name','decl_date']};
+  for (const id of (req[s]||[])) {
+    const e = document.getElementById(id);
+    if (e && !e.value.trim()) {
+      e.focus(); e.style.borderColor='var(--rd)';
+      setTimeout(()=>e.style.borderColor='',1500);
+      showToast('Please complete all required fields','error'); return false;
+    }
+  }
+  if (s===5) {
+    const px = sigCtx.getImageData(0,0,sigCanvas.width,sigCanvas.height).data;
+    if (!Array.from(px).some((v,i)=>i%4===3&&v>10)) { showToast('Please provide your signature','error'); return false; }
+  }
+  return true;
+}
+function vv(id) { return document.getElementById(id)?.value?.trim()||''; }
+function buildReview() {
+  const d=[['Personal details',[['Name',`${vv('fname')} ${vv('lname')}`],['DOB',vv('dob')],['Mobile',vv('mobile')],['Email',vv('email')],['Emergency',`${vv('ecname')} · ${vv('ectel')}`],['Employer',vv('employer')],['Trade',vv('trade')],['Project',vv('project')],['Start date',vv('startdate')]]],['Qualifications',[['CSCS',`${vv('cscs_type')} ${vv('cscs_num')}`],['RTW',document.querySelector('input[name="rtw"]:checked')?.value||'—'],['ID',vv('id_type')],['Files',uploadedFiles.length+' to upload']]],['Declaration',[['Name',vv('decl_name')],['Date',vv('decl_date')]]]];
+  document.getElementById('reviewContent').innerHTML=d.map(([t,rows])=>`<div class="ds"><div class="dt">${t}</div><div class="dg">${rows.map(([l,val])=>`<div class="df"><label>${l}</label><span>${val||'—'}</span></div>`).join('')}</div></div>`).join('');
+}
+
+// ── FILE UPLOAD ───────────────────────────────────────────────────────
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', e=>{e.preventDefault();uploadZone.classList.add('dov')});
+uploadZone.addEventListener('dragleave', ()=>uploadZone.classList.remove('dov'));
+uploadZone.addEventListener('drop', e=>{e.preventDefault();uploadZone.classList.remove('dov');handleFiles(e.dataTransfer.files)});
+function handleFiles(files) {
+  Array.from(files).forEach(f=>{
+    if(f.size>10*1024*1024){showToast(f.name+' too large (max 10MB)','error');return}
+    const r=new FileReader();r.onload=e=>{uploadedFiles.push({name:f.name,size:f.size,type:f.type,dataUrl:e.target.result});renderUploaded()};r.readAsDataURL(f);
+  });
+}
+function renderUploaded() {
+  document.getElementById('uploadedFiles').innerHTML=uploadedFiles.map((f,i)=>`<div class="uf"><i class="ti ${f.type.startsWith('image')?'ti-photo':'ti-file'}" aria-hidden="true"></i><span class="ufn">${f.name}</span><span class="ufs">${(f.size/1024).toFixed(0)}KB</span><button class="ufr" onclick="removeFile(${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></div>`).join('');
+}
+function removeFile(i){uploadedFiles.splice(i,1);renderUploaded()}
+
+// ── SIGNATURE ─────────────────────────────────────────────────────────
+const sigCanvas=document.getElementById('sigCanvas');
+const sigCtx=sigCanvas.getContext('2d');
+let drawing=false,lx=0,ly=0;
+function sPos(e){const r=sigCanvas.getBoundingClientRect();const s=e.touches?e.touches[0]:e;return[(s.clientX-r.left)*(sigCanvas.width/r.width),(s.clientY-r.top)*(sigCanvas.height/r.height)]}
+sigCanvas.addEventListener('mousedown',e=>{drawing=true;[lx,ly]=sPos(e)});
+sigCanvas.addEventListener('mousemove',e=>{if(!drawing)return;const[x,y]=sPos(e);sigCtx.beginPath();sigCtx.strokeStyle='#18180E';sigCtx.lineWidth=2;sigCtx.lineCap='round';sigCtx.moveTo(lx,ly);sigCtx.lineTo(x,y);sigCtx.stroke();[lx,ly]=[x,y]});
+sigCanvas.addEventListener('mouseup',()=>drawing=false);sigCanvas.addEventListener('mouseleave',()=>drawing=false);
+sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;[lx,ly]=sPos(e)},{passive:false});
+sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const[x,y]=sPos(e);sigCtx.beginPath();sigCtx.strokeStyle='#18180E';sigCtx.lineWidth=2;sigCtx.lineCap='round';sigCtx.moveTo(lx,ly);sigCtx.lineTo(x,y);sigCtx.stroke();[lx,ly]=[x,y]},{passive:false});
+sigCanvas.addEventListener('touchend',()=>drawing=false);
+function clearSig(){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height)}
+
+// ── GOOGLE DRIVE ──────────────────────────────────────────────────────
+function updateDriveStatus() {
+  const el=document.getElementById('driveStatus');if(!el)return;
+  if(driveToken){el.className='drive-st conn';el.innerHTML='<i class="ti ti-circle-check" aria-hidden="true"></i> Google Drive connected — files upload automatically'}
+  else{el.className='drive-st disc';el.innerHTML='<i class="ti ti-alert-circle" aria-hidden="true"></i> Not connected — enter Client ID and click Connect'}
+}
+function connectDrive() {
+  const c=cfg();const clientId=document.getElementById('cfg_gdrive').value.trim()||c.gdrive_client_id;
+  if(!clientId){showToast('Enter your Google Client ID first','error');return}
+  c.gdrive_client_id=clientId;localStorage.setItem('antvic_cfg',JSON.stringify(c));
+  const params=new URLSearchParams({client_id:clientId,redirect_uri:window.location.origin+window.location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/drive.file',include_granted_scopes:'true'});
+  const popup=window.open('https://accounts.google.com/o/oauth2/v2/auth?'+params,'gauth','width=500,height=600,scrollbars=yes');
+  const check=setInterval(()=>{try{if(popup.closed){clearInterval(check);return}const url=popup.location.href;if(url.includes('access_token')){const h=new URLSearchParams(popup.location.hash.slice(1));driveToken=h.get('access_token');popup.close();clearInterval(check);updateDriveStatus();showToast('Google Drive connected')}}catch(e){}},500);
+}
+function disconnectDrive(){driveToken=null;updateDriveStatus();showToast('Google Drive disconnected')}
+async function getOrCreateFolder(name,parentId=null){
+  const headers={'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'};
+  const q=`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false${parentId?` and '${parentId}' in parents`:''}`;
+  const res=await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`,{headers});
+  const data=await res.json();
+  if(data.files&&data.files.length>0)return data.files[0].id;
+  const body={name,mimeType:'application/vnd.google-apps.folder',parents:parentId?[parentId]:[]};
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers,body:JSON.stringify(body)});
+  return(await cr.json()).id;
+}
+async function uploadToDrive(record) {
+  if(!driveToken||!uploadedFiles.length)return null;
+  try{
+    const bar=document.getElementById('uprog-bar'),prog=document.getElementById('uprog');
+    prog.style.display='block';
+    const rootId=await getOrCreateFolder('Inductions');
+    const projId=await getOrCreateFolder(record.project||'General',rootId);
+    const wfId=await getOrCreateFolder(`${record.fname} ${record.lname} ${record.ref}`,projId);
+    const links=[];
+    for(let i=0;i<uploadedFiles.length;i++){
+      bar.style.width=((i/uploadedFiles.length)*100)+'%';
+      const f=uploadedFiles[i];
+      const b64=f.dataUrl.split(',')[1];
+      const boundary='antvic_b';
+      const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({name:f.name,parents:[wfId]})}\r\n--${boundary}\r\nContent-Type: ${f.type}\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64}\r\n--${boundary}--`;
+      const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':`multipart/related; boundary=${boundary}`},body});
+      const r=await res.json();if(r.webViewLink)links.push({name:f.name,link:r.webViewLink});
+    }
+    bar.style.width='100%';setTimeout(()=>{prog.style.display='none';bar.style.width='0'},800);
+    return links;
+  }catch(e){console.warn('Drive upload failed:',e);return null}
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────
+async function submitForm() {
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i> Saving...';
+  const ref='ATV-MK-'+String(Math.floor(1000+Math.random()*9000));
+  const record={
+    id:Date.now(),ref,timestamp:new Date().toISOString(),
+    fname:vv('fname'),lname:vv('lname'),dob:vv('dob'),ni:vv('ni'),
+    mobile:vv('mobile'),email:vv('email'),ecname:vv('ecname'),ectel:vv('ectel'),
+    employer:vv('employer'),trade:vv('trade'),startdate:vv('startdate'),project:vv('project'),
+    cscs_type:vv('cscs_type'),cscs_num:vv('cscs_num'),cscs_exp:vv('cscs_exp'),
+    cards:Array.from(document.querySelectorAll('.card-cb')).filter(c=>c.checked).map(c=>c.parentElement.querySelector('span').textContent),
+    rtw:document.querySelector('input[name="rtw"]:checked')?.value||'',id_type:vv('id_type'),
+    med:document.querySelector('input[name="med"]:checked')?.value||'',med_detail:vv('med_detail'),
+    allergy:document.querySelector('input[name="allergy"]:checked')?.value||'',allergy_detail:vv('allergy_detail'),
+    hs_rules:Array.from(document.querySelectorAll('.hs')).map(c=>c.checked),
+    site_rules:Array.from(document.querySelectorAll('.sr')).map(c=>c.checked),
+    decl_name:vv('decl_name'),decl_date:vv('decl_date'),
+    signature:sigCanvas.toDataURL('image/png'),comments:vv('comments'),
+    files:uploadedFiles.map(f=>({name:f.name,size:f.size,type:f.type,dataUrl:f.dataUrl})),
+    status:'new',driveLinks:[]
+  };
+  if(driveToken&&uploadedFiles.length){
+    btn.innerHTML='<i class="ti ti-cloud-upload" aria-hidden="true"></i> Uploading files...';
+    const links=await uploadToDrive(record);if(links)record.driveLinks=links;
+  }
+  records.push(record);localStorage.setItem('antvic_inductions',JSON.stringify(records));
+  lastSubmission=record;await sendEmail(record);
+  document.getElementById('refCode').textContent='REF: '+ref;
+  document.getElementById('doneDate').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('fs6').classList.remove('visible');
+  document.getElementById('fsSuccess').classList.add('visible');
+  updateNavCount();document.getElementById('content').scrollTo(0,0);
+}
+function downloadMyPDF(){if(lastSubmission)generatePDF(lastSubmission)}
+function resetForm(){
+  ['fname','lname','dob','ni','mobile','email','ecname','ectel','employer','trade','startdate','project','cscs_type','cscs_num','cscs_exp','id_type','med_detail','allergy_detail','decl_name','decl_date','comments'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  clearSig();uploadedFiles=[];renderUploaded();
+  document.getElementById('fsSuccess').classList.remove('visible');
+  currentStep=1;document.getElementById('fs1').classList.add('visible');
+  updateProgress();document.getElementById('content').scrollTo(0,0);
+}
+
+// ── EMAIL ─────────────────────────────────────────────────────────────
+async function sendEmail(r) {
+  const c=cfg();if(!c.emailOn)return;
+  const dl=r.driveLinks?.length?`<p><b>Drive files:</b> ${r.driveLinks.map(l=>`<a href="${l.link}">${l.name}</a>`).join(', ')}</p>`:'';
+  const body=`<h2 style="color:#E8650A">New Site Induction — ${r.ref}</h2><p><b>Worker:</b> ${r.fname} ${r.lname}</p><p><b>Project:</b> ${r.project}</p><p><b>Trade:</b> ${r.trade}</p><p><b>Employer:</b> ${r.employer}</p><p><b>Mobile:</b> ${r.mobile}</p><p><b>Start date:</b> ${r.startdate}</p><p><b>CSCS:</b> ${r.cscs_type}</p><p><b>H&S:</b> ${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11} confirmed</p><p><b>Files:</b> ${r.files?.length||0}</p>${dl}<hr/><p style="font-size:12px;color:#888">Antvic Site Induction System</p>`;
+  try{if(c.gmail_user&&c.gmail_pass){await Email.send({Host:'smtp.gmail.com',Username:c.gmail_user,Password:c.gmail_pass,To:c.email||c.gmail_user,From:c.gmail_user,Subject:`New Site Induction — ${r.fname} ${r.lname} — ${r.ref}`,Body:body})}}
+  catch(e){console.warn('Email failed:',e.message)}
+}
+function saveGmail(){
+  const user=document.getElementById('gmail_user').value.trim();const pass=document.getElementById('gmail_pass').value.trim();
+  if(!user||!pass){showToast('Enter Gmail address and app password','error');return}
+  const c=cfg();c.gmail_user=user;c.gmail_pass=pass;localStorage.setItem('antvic_cfg',JSON.stringify(c));
+  testGmail(user,pass);
+}
+async function testGmail(user,pass){
+  const el=document.getElementById('gmailResult');el.style.display='block';el.innerHTML='<span style="color:var(--tx3)">Sending test email...</span>';
+  try{await Email.send({Host:'smtp.gmail.com',Username:user,Password:pass,To:user,From:user,Subject:'Antvic Induction — Test Email',Body:'<p>Gmail is connected correctly.</p><p>'+new Date().toLocaleString('en-GB')+'</p>'});el.innerHTML='<span style="color:var(--gn)">✓ Test email sent — check your inbox.</span>';showToast('Gmail connected')}
+  catch(e){el.innerHTML=`<span style="color:var(--rd)">✗ Failed: ${e.message||'Check app password'}</span>`;showToast('Test failed','error')}
+}
+function clearGmail(){const c=cfg();delete c.gmail_user;delete c.gmail_pass;localStorage.setItem('antvic_cfg',JSON.stringify(c));document.getElementById('gmail_pass').value='';showToast('Cleared')}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────
+function loadSettings(){
+  const c=cfg();
+  if(c.email)document.getElementById('cfg_email').value=c.email;
+  if(c.emailOn!==undefined)document.getElementById('tog_email').checked=c.emailOn;
+  renderProjectList();renderProjectFilter();populateProjectSelect();
+}
+function loadEmailSettings(){
+  const c=cfg();
+  if(c.gmail_user)document.getElementById('gmail_user').value=c.gmail_user;
+  if(c.gdrive_client_id)document.getElementById('cfg_gdrive').value=c.gdrive_client_id;
+  updateDriveStatus();
+}
+function saveSettings(){
+  const c=cfg();c.email=document.getElementById('cfg_email').value;
+  const np=document.getElementById('cfg_pin').value;
+  if(np&&/^\d{4}$/.test(np)){c.pin=np;document.getElementById('cfg_pin').value=''}
+  c.emailOn=document.getElementById('tog_email').checked;
+  localStorage.setItem('antvic_cfg',JSON.stringify(c));showToast('Settings saved');
+}
+function renderProjectList(){
+  const ps=getProjects();
+  document.getElementById('projList').innerHTML=ps.length?ps.map((p,i)=>`<div class="proj-item"><i class="ti ti-building" style="font-size:16px;color:var(--tx3)" aria-hidden="true"></i><span class="proj-name">${p}</span><button class="proj-rm" onclick="removeProject(${i})" aria-label="Remove project"><i class="ti ti-x" aria-hidden="true"></i></button></div>`).join(''):'<p style="font-size:13px;color:var(--tx3)">No projects yet.</p>';
+}
+function addProject(){
+  const inp=document.getElementById('newProjInput');const val=inp.value.trim();if(!val)return;
+  const ps=getProjects();if(!ps.includes(val)){ps.push(val);localStorage.setItem('antvic_projects',JSON.stringify(ps))}
+  inp.value='';renderProjectList();renderProjectFilter();populateProjectSelect();showToast('Project added');
+}
+function removeProject(i){const ps=getProjects();ps.splice(i,1);localStorage.setItem('antvic_projects',JSON.stringify(ps));renderProjectList();renderProjectFilter();populateProjectSelect()}
+function populateProjectSelect(){
+  const ps=getProjects();const sel=document.getElementById('project');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— select project —</option>'+ps.map(p=>`<option value="${p}">${p}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+function renderProjectFilter(){
+  const ps=getProjects();const sel=document.getElementById('filterProject');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">All projects</option>'+ps.map(p=>`<option value="${p}">${p}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────
+function updateNavCount(){const n=records.length;document.getElementById('sideCount').textContent=n;document.getElementById('mobCount').textContent=n}
+function updateStats(){
+  const now=new Date(),ts=now.toDateString(),wa=new Date(now-7*24*60*60*1000);
+  document.getElementById('statTotal').textContent=records.length;
+  document.getElementById('statToday').textContent=records.filter(r=>new Date(r.timestamp).toDateString()===ts).length;
+  document.getElementById('statWeek').textContent=records.filter(r=>new Date(r.timestamp)>=wa).length;
+  document.getElementById('statFiles').textContent=records.reduce((a,r)=>a+(r.files?.length||0),0);
+  updateNavCount();
+}
+function getFiltered(){
+  const s=document.getElementById('searchInput').value.toLowerCase();
+  const proj=document.getElementById('filterProject').value;
+  const trade=document.getElementById('filterTrade').value;
+  const status=document.getElementById('filterStatus').value;
+  return records.filter(r=>{
+    if(s&&!`${r.fname} ${r.lname} ${r.trade} ${r.employer} ${r.ref} ${r.project||''}`.toLowerCase().includes(s))return false;
+    if(proj&&r.project!==proj)return false;
+    if(trade&&r.trade!==trade)return false;
+    if(status&&r.status!==status)return false;
+    return true;
+  }).reverse();
+}
+function renderTable(){
+  const f=getFiltered();const tb=document.getElementById('tableBody');
+  if(!f.length){
+    tb.innerHTML=`<tr><td colspan="9"><div class="empty-state"><i class="ti ti-clipboard-off" aria-hidden="true"></i><div class="empty-title">${records.length?'No records match filters':'No inductions yet'}</div><div class="empty-sub">${records.length?'Try clearing filters':'Workers complete the New Induction form'}</div></div></td></tr>`;
+    return;
+  }
+  const sb={new:'<span class="badge b-new">New</span>',ok:'<span class="badge b-ok">Approved</span>',flag:'<span class="badge b-flag">Flagged</span>'};
+  tb.innerHTML=f.map(r=>{
+    const dt=new Date(r.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const hok=(r.hs_rules?.filter(Boolean).length||0)===(r.hs_rules?.length||11);
+    const hasDrive=r.driveLinks?.length>0;
+    return`<tr>
+      <td><div class="wname">${r.fname} ${r.lname}</div><div class="wref">${r.ref}</div></td>
+      <td style="font-size:12px;color:var(--tx2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.project||'—'}</td>
+      <td><span class="badge b-tr">${r.trade||'—'}</span></td>
+      <td style="font-size:12.5px;color:var(--tx2)">${r.employer||'—'}</td>
+      <td style="font-size:12px;color:var(--tx3);white-space:nowrap">${dt}</td>
+      <td><span class="badge ${hasDrive?'b-ok':r.files?.length?'b-or':'b-tr'}">${hasDrive?'<i class="ti ti-brand-google-drive"></i> ':''}${r.files?.length||0}</span></td>
+      <td><span class="badge ${hok?'b-ok':'b-flag'}">${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}</span></td>
+      <td>${sb[r.status]||sb.new}</td>
+      <td><div class="row-act">
+        <button class="ib" title="View" onclick="viewRecord(${r.id})"><i class="ti ti-eye" aria-hidden="true"></i></button>
+        <button class="ib" title="PDF" onclick="generatePDF(records.find(x=>x.id===${r.id}))"><i class="ti ti-file-type-pdf" aria-hidden="true"></i></button>
+        <button class="ib" title="Approve" onclick="setStatus(${r.id},'ok')"><i class="ti ti-check" aria-hidden="true"></i></button>
+        <button class="ib" title="Flag" onclick="setStatus(${r.id},'flag')"><i class="ti ti-alert-triangle" aria-hidden="true"></i></button>
+        <button class="ib ib-del" title="Delete" onclick="deleteRecord(${r.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function clearFilters(){['searchInput','filterProject','filterTrade','filterStatus'].forEach(id=>document.getElementById(id).value='');renderTable()}
+function setStatus(id,s){const r=records.find(x=>x.id===id);if(r){r.status=s;localStorage.setItem('antvic_inductions',JSON.stringify(records));renderTable()}}
+function deleteRecord(id){if(!confirm('Delete this induction record?'))return;records=records.filter(x=>x.id!==id);localStorage.setItem('antvic_inductions',JSON.stringify(records));updateStats();renderTable()}
+
+// ── MODAL ─────────────────────────────────────────────────────────────
+function viewRecord(id){
+  const r=records.find(x=>x.id===id);if(!r)return;currentRecord=r;
+  document.getElementById('modalTitle').textContent=`${r.fname} ${r.lname}`;
+  document.getElementById('modalRef').textContent=`${r.ref} · ${new Date(r.timestamp).toLocaleString('en-GB')}`;
+  const g=(l,v)=>`<div class="df"><label>${l}</label><span>${v||'—'}</span></div>`;
+  let html=`<div class="ds"><div class="dt">Personal details</div><div class="dg">${g('Full name',`${r.fname} ${r.lname}`)}${g('DOB',r.dob)}${g('Mobile',r.mobile)}${g('Email',r.email)}${g('Emergency',`${r.ecname} · ${r.ectel}`)}${g('Employer',r.employer)}${g('Trade',r.trade)}${g('Project',r.project)}${g('Start date',r.startdate)}</div></div>
+  <div class="ds"><div class="dt">Qualifications</div><div class="dg">${g('CSCS',`${r.cscs_type||'—'} ${r.cscs_num?'('+r.cscs_num+')':''}`)}${g('Expiry',r.cscs_exp)}${g('Right to work',r.rtw)}${g('ID provided',r.id_type)}${r.cards?.length?`<div class="df df-full"><label>Additional cards</label><span>${r.cards.join(', ')}</span></div>`:''}</div></div>
+  <div class="ds"><div class="dt">Health</div><div class="dg">${g('Medical',r.med+(r.med_detail?' — '+r.med_detail:''))}${g('Allergies',r.allergy+(r.allergy_detail?' — '+r.allergy_detail:''))}</div></div>
+  <div class="ds"><div class="dt">H&S rules (${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11})</div>${(r.hs_rules||[]).map((c,i)=>`<div class="hs-row"><i class="ti ${c?'ti-circle-check':'ti-circle-x'}" style="color:${c?'var(--gn)':'var(--rd)'}" aria-hidden="true"></i>Rule ${i+1} — ${c?'Confirmed':'Not confirmed'}</div>`).join('')}</div>`;
+  if(r.driveLinks?.length)html+=`<div class="ds"><div class="dt">Google Drive files (${r.driveLinks.length})</div><div class="fl-list">${r.driveLinks.map(l=>`<div class="fl-row"><i class="ti ti-brand-google-drive" style="color:#1a73e8" aria-hidden="true"></i><span class="fl-name">${l.name}</span><a href="${l.link}" target="_blank" class="fl-btn">Open</a></div>`).join('')}</div></div>`;
+  else if(r.files?.length)html+=`<div class="ds"><div class="dt">Files (${r.files.length}) — stored locally</div><div class="fl-list">${r.files.map((f,i)=>`<div class="fl-row"><i class="ti ${f.type?.startsWith('image')?'ti-photo':'ti-file'}" aria-hidden="true"></i><span class="fl-name">${f.name}</span><span class="fl-size">${(f.size/1024).toFixed(0)}KB</span><button class="fl-btn" onclick="viewFile(${records.indexOf(r)},${i})">View</button></div>`).join('')}</div></div>`;
+  if(r.signature)html+=`<div class="ds"><div class="dt">Signature</div><img src="${r.signature}" style="max-width:100%;border:1px solid var(--bd);border-radius:var(--r);background:var(--sf2)" alt="Signature"/></div>`;
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('detailModal').classList.add('open');
+}
+function viewFile(ri,fi){const f=records[ri]?.files[fi];if(!f)return;const w=window.open();w.document.write(`<html><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${f.dataUrl}" style="max-width:100%;max-height:100vh" alt="${f.name}"/></body></html>`)}
+function closeModal(){document.getElementById('detailModal').classList.remove('open')}
+
+// ── PDF ───────────────────────────────────────────────────────────────
+async function generatePDF(r){
+  if(!r)return;const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210,M=15,CW=W-2*M;let y=0;
+  const ap=()=>{doc.addPage();y=15};const cy=n=>{if(y+n>275)ap()};
+  doc.setFillColor(30,30,28);doc.rect(0,0,W,38,'F');doc.setFillColor(232,101,10);doc.rect(0,0,6,38,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Antvic Ltd',14,11);
+  doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('Site Induction Form',14,20);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(150,150,148);
+  doc.text('Caldecotte Lake Business Park · Milton Keynes MK7 8LF',14,27);
+  doc.text(`Reference: ${r.ref}  |  Project: ${r.project||'—'}  |  ${new Date(r.timestamp).toLocaleDateString('en-GB')}`,14,33);
+  y=46;
+  const sec=t=>{cy(14);doc.setFillColor(242,241,237);doc.rect(M,y,CW,8,'F');doc.setFillColor(232,101,10);doc.rect(M,y,3,8,'F');doc.setTextColor(232,101,10);doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text(t.toUpperCase(),M+6,y+5.5);y+=11};
+  const row=(l,v)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v||'—'),M+52,y);y+=6.5};
+  const row2=(l1,v1,l2,v2)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l1,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v1||'—'),M+40,y);doc.setTextColor(107,107,103);doc.setFont('helvetica','normal');doc.text(l2,M+CW/2,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v2||'—'),M+CW/2+38,y);y+=6.5};
+  sec('Personal Details');row2('First name',r.fname,'Last name',r.lname);row2('DOB',r.dob,'NI',r.ni);row2('Mobile',r.mobile,'Email',r.email);row2('Emergency',r.ecname,'Phone',r.ectel);row('Employer',r.employer);row2('Trade',r.trade,'Start date',r.startdate);row('Project',r.project);y+=3;
+  sec('Qualifications & Right to Work');row2('CSCS type',r.cscs_type,'CSCS No.',r.cscs_num);row2('Expiry',r.cscs_exp,'Right to work',r.rtw);row('ID provided',r.id_type);if(r.cards?.length)row('Additional cards',r.cards.join(', '));y+=3;
+  sec('Health');row2('Medical?',r.med,'Allergies?',r.allergy);if(r.med_detail)row('Medical details',r.med_detail);if(r.allergy_detail)row('Allergy details',r.allergy_detail);y+=3;
+  sec('Confirmation');row('H&S rules',`${r.hs_rules?.filter(Boolean).length||0} of ${r.hs_rules?.length||11} confirmed`);row('Site rules',`${r.site_rules?.filter(Boolean).length||0} of ${r.site_rules?.length||11} confirmed`);y+=3;
+  sec('Declaration');row('Declared by',r.decl_name);row('Date',r.decl_date);if(r.comments)row('Comments',r.comments);y+=3;
+  if(r.driveLinks?.length){sec('Google Drive Files');for(const f of r.driveLinks){cy(8);doc.setTextColor(28,28,26);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(`• ${f.name}`,M+4,y);y+=6}}
+  else if(r.files?.length){sec(`Uploaded Files (${r.files.length})`);for(const f of r.files){cy(8);doc.setTextColor(28,28,26);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(`• ${f.name} (${(f.size/1024).toFixed(0)}KB)`,M+4,y);y+=6;if(f.type?.startsWith('image')&&f.dataUrl){try{cy(55);doc.addImage(f.dataUrl,M,y,Math.min(CW,80),0);y+=55}catch(e){}}}}
+  if(r.signature){cy(40);sec('Signature');try{doc.addImage(r.signature,'PNG',M,y,CW*0.6,25);y+=28}catch(e){}}
+  doc.setFillColor(232,101,10);doc.rect(0,290,W,2,'F');doc.setTextColor(150,150,148);doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text(`Antvic Ltd  |  ${r.ref}  |  ${r.project||''}  |  Confidential`,M,296);
+  doc.text(new Date(r.timestamp).toLocaleString('en-GB'),W-M,296,{align:'right'});
+  doc.save(`Induction_${r.fname}_${r.lname}_${r.ref}.pdf`);
+}
+async function exportAllPDF(){
+  const f=getFiltered();if(!f.length){showToast('No records','error');return}
+  showToast(`Generating ${f.length} records...`);
+  const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const W=210,M=15,CW=W-2*M;
+  for(let ri=0;ri<f.length;ri++){
+    const r=f[ri];if(ri>0)doc.addPage();let y=0;
+    const ap=()=>{doc.addPage();y=15};const cy=n=>{if(y+n>275)ap()};
+    doc.setFillColor(30,30,28);doc.rect(0,0,W,38,'F');doc.setFillColor(232,101,10);doc.rect(0,0,6,38,'F');
+    doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Antvic Ltd',14,11);
+    doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('Site Induction Form',14,20);
+    doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(150,150,148);
+    doc.text('Caldecotte Lake Business Park · Milton Keynes',14,27);
+    doc.text(`${r.ref}  |  ${r.project||''}  |  ${new Date(r.timestamp).toLocaleDateString('en-GB')}`,14,33);
+    y=46;
+    const sec=t=>{cy(14);doc.setFillColor(242,241,237);doc.rect(M,y,CW,8,'F');doc.setFillColor(232,101,10);doc.rect(M,y,3,8,'F');doc.setTextColor(232,101,10);doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text(t.toUpperCase(),M+6,y+5.5);y+=11};
+    const row=(l,v)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v||'—'),M+52,y);y+=6.5};
+    const row2=(l1,v1,l2,v2)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l1,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v1||'—'),M+40,y);doc.setTextColor(107,107,103);doc.setFont('helvetica','normal');doc.text(l2,M+CW/2,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v2||'—'),M+CW/2+38,y);y+=6.5};
+    sec('Personal Details');row2('Name',`${r.fname} ${r.lname}`,'Trade',r.trade);row('Employer',r.employer);row2('Start date',r.startdate,'Project',r.project);y+=3;
+    sec('Qualifications');row2('CSCS',r.cscs_type,'RTW',r.rtw);row('ID provided',r.id_type);y+=3;
+    sec('Confirmation');row('H&S',`${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}`);row('Declared by',r.decl_name);row('Date',r.decl_date);y+=3;
+    if(r.signature){cy(35);sec('Signature');try{doc.addImage(r.signature,'PNG',M,y,CW*0.5,22);y+=25}catch(e){}}
+    doc.setFillColor(232,101,10);doc.rect(0,290,W,2,'F');doc.setTextColor(150,150,148);doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.text(`Antvic Ltd  |  ${r.ref}  |  Confidential`,M,296);doc.text(new Date(r.timestamp).toLocaleString('en-GB'),W-M,296,{align:'right'});
+  }
+  doc.save(`Antvic_Inductions_${new Date().toISOString().slice(0,10)}.pdf`);showToast(`Exported ${f.length} records`);
+}
+function exportCSV(){
+  const h=['Ref','Date','Project','First Name','Last Name','DOB','NI','Mobile','Email','Emergency Name','Emergency Phone','Employer','Trade','Start Date','CSCS Type','CSCS Num','CSCS Exp','RTW','ID Type','Medical','Allergies','H&S','Site Rules','Files','Drive Files','Status'];
+  const rows=records.map(r=>[r.ref,new Date(r.timestamp).toLocaleDateString('en-GB'),r.project,r.fname,r.lname,r.dob,r.ni,r.mobile,r.email,r.ecname,r.ectel,r.employer,r.trade,r.startdate,r.cscs_type,r.cscs_num,r.cscs_exp,r.rtw,r.id_type,r.med+(r.med_detail?' ('+r.med_detail+')':''),r.allergy+(r.allergy_detail?' ('+r.allergy_detail+')':''),`${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}`,`${r.site_rules?.filter(Boolean).length||0}/${r.site_rules?.length||11}`,r.files?.length||0,r.driveLinks?.length||0,r.status].map(v=>`"${String(v||'').replace(/"/g,'""')}"`));
+  const blob=new Blob([[h.join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Antvic_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+function exportJSON(){const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Antvic_${new Date().toISOString().slice(0,10)}.json`;a.click()}
+function clearAll(){if(!confirm('Delete ALL induction records? This cannot be undone.'))return;records=[];localStorage.removeItem('antvic_inductions');updateStats();renderTable();showToast('All records cleared')}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+function showToast(msg,type='success'){const t=document.getElementById('toast');t.style.background=type==='error'?'#C0392B':'#2D7A3A';t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3000)}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+document.getElementById('decl_date').value=new Date().toISOString().split('T')[0];
+document.getElementById('startdate').value=new Date().toISOString().split('T')[0];
+populateProjectSelect();updateNavCount();
+</script>
+</body>
+</html>
