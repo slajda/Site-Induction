@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Antvic Ltd â Site Induction Form</title>
+<title>Antvic Ltd Ã¢ÂÂ Site Induction Form</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -383,7 +383,7 @@ input.invalid, select.invalid, textarea.invalid {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ââ MOBILE âââââââââââââââââââââââââââââââââââââââââââââââââââ */
+/* Ã¢ÂÂÃ¢ÂÂ MOBILE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 @media (max-width: 640px) {
   .page-wrap { padding: 18px 14px 56px; }
   .header { gap: 10px; margin-bottom: 20px; }
@@ -823,7 +823,7 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Sending\u2026';
 
-  canvas.toBlob(function(sigBlob) {
+
     var fd = new FormData();
 
     // Web3Forms config fields
@@ -860,8 +860,7 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
 
     // Signature PNG
     if (sigBlob) {
-      var sigName = 'Signature_' + document.getElementById('fullName').value.replace(/\s+/g, '_') + '.png';
-      fd.append('25 Signature', sigBlob, sigName);
+      fd.append('25 Signature (PNG)', canvas.toDataURL('image/png'));
     }
 
 
@@ -908,7 +907,7 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
         btn.innerHTML = 'Submit Induction';
       });
 
-  }, 'image/png');
+  
 });
 </script>
 </body>
