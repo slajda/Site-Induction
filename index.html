@@ -2,1268 +2,515 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Antvic Site Induction System</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Antvic — Site Induction System</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
 <style>
-:root {
-  --orange:#E8650A; --orange-light:#FEF3EC; --charcoal:#2C2C2A;
-  --bg:#F2F1ED; --surface:#FFFFFF; --surface2:#F8F7F4;
-  --border:#DDDCDA; --border2:#C8C7C4;
-  --text:#1C1C1A; --muted:#6B6B67; --muted2:#9B9B97;
-  --green:#2D7A3A; --green-light:#EAF3EC;
-  --red:#C0392B; --red-light:#FDECEA;
-  --blue:#1565C0; --blue-light:#E3F0FF;
-  --radius:10px; --radius-lg:14px; --radius-sm:6px;
-  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg:0 4px 24px rgba(0,0,0,0.12);
-}
+:root{--or:#E8650A;--ord:#C4540A;--orl:#FEF3EC;--orll:#FFF8F4;--ch:#2C2C2A;--ch2:#3A3A38;--bg:#F0EFE9;--sf:#FFF;--sf2:#F8F7F3;--sf3:#F2F1ED;--bd:#E0DED8;--bd2:#CCCAC4;--tx:#1A1A18;--tx2:#555550;--tx3:#888882;--gn:#2D7A3A;--gnl:#EAF3EC;--rd:#C0392B;--rdl:#FDECEA;--bl:#1565C0;--bll:#E3F0FF;--am:#B8860B;--aml:#FFF8E1;--r:8px;--rl:12px;--rxl:16px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
-
-/* ── VIEWS ── */
-.view{display:none}
-.view.active{display:block}
-
-/* ── NAV ── */
-.top-nav{background:var(--charcoal);padding:0 1.5rem;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;height:52px}
-.nav-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
-.nav-logo{width:32px;height:32px;background:var(--orange);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
-.nav-name{color:#fff;font-weight:600;font-size:14px}
-.nav-site{color:rgba(255,255,255,0.45);font-size:12px;margin-left:2px}
-.nav-btn{height:52px;padding:0 1.1rem;background:none;border:none;color:rgba(255,255,255,0.6);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;border-bottom:2px solid transparent;transition:all 0.15s}
-.nav-btn:hover{color:#fff;background:rgba(255,255,255,0.06)}
-.nav-btn.active{color:#fff;border-bottom-color:var(--orange)}
-.nav-pill{background:var(--orange);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:4px}
-
-/* ── CARDS ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
-.section-label{font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--orange);text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-bottom:1rem}
-
-/* ── FORM STYLES ── */
-#formView{padding:1.5rem 1rem 4rem;max-width:680px;margin:0 auto}
-.form-header{background:var(--charcoal);border-radius:var(--radius-lg);padding:1.5rem 1.75rem;margin-bottom:1.5rem}
-.fh-logo{display:flex;align-items:center;gap:10px;margin-bottom:.9rem}
-.fh-logobox{width:34px;height:34px;background:var(--orange);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:15px}
-.fh-co{color:rgba(255,255,255,0.7);font-size:13px;font-weight:500}
-.fh-title{color:#fff;font-size:21px;font-weight:700;margin-bottom:3px}
-.fh-sub{color:rgba(255,255,255,0.45);font-size:12px}
-.progress-bar{display:flex;gap:4px;margin-top:1.1rem}
-.progress-step{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.15);transition:background 0.3s}
-.progress-step.active{background:var(--orange)}
-.progress-step.done{background:rgba(255,255,255,0.45)}
-
-.form-section{display:none}
-.form-section.visible{display:block}
-
-.note-box{background:var(--orange-light);border-left:3px solid var(--orange);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.75rem 1rem;margin-bottom:1rem;font-size:13px;color:var(--text);line-height:1.6}
-.field{margin-bottom:.9rem}
-.field:last-child{margin-bottom:0}
-.field-label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
-.field-label .req{color:var(--orange);margin-left:2px}
-.field input[type=text],.field input[type=email],.field input[type=tel],.field input[type=date],.field select,.field textarea{width:100%;padding:0 11px;height:38px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(232,101,10,0.1)}
-.field textarea{height:80px;padding:9px 11px;resize:vertical}
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.check-group{display:flex;flex-direction:column;gap:8px}
-.check-item{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
-.check-item input{margin-top:3px;accent-color:var(--orange);width:15px;height:15px;flex-shrink:0;cursor:pointer}
-.check-item span{font-size:13.5px;line-height:1.55}
-.radio-group{display:flex;gap:16px;margin-top:5px}
-.radio-item{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:14px}
-.radio-item input{accent-color:var(--orange);width:15px;height:15px;cursor:pointer}
-
-/* Upload zone */
-.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2)}
-.upload-zone:hover,.upload-zone.drag-over{border-color:var(--orange);background:var(--orange-light)}
-.upload-zone input[type=file]{display:none}
-.upload-icon{font-size:28px;margin-bottom:6px}
-.upload-label{font-size:13px;color:var(--muted);line-height:1.5}
-.upload-label strong{color:var(--orange)}
-.uploaded-files{margin-top:.75rem;display:flex;flex-direction:column;gap:6px}
-.uploaded-file{display:flex;align-items:center;gap:8px;background:var(--green-light);border:1px solid rgba(45,122,58,0.2);border-radius:var(--radius-sm);padding:6px 10px;font-size:12.5px}
-.uploaded-file .fname{flex:1;color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.uploaded-file .fsize{color:var(--muted);font-size:11px;flex-shrink:0}
-.uploaded-file .fremove{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 2px;line-height:1}
-
-/* Signature */
-.sig-wrap{border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden}
-.sig-canvas{display:block;width:100%;height:120px;cursor:crosshair;background:var(--surface2);touch-action:none}
-.sig-footer{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-top:1px solid var(--border);background:var(--surface2)}
-.sig-hint{font-size:11px;color:var(--muted2)}
-.btn-clear-sig{font-size:11px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:4px;padding:3px 9px;cursor:pointer;font-family:inherit}
-
-/* Nav buttons */
-.form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem}
-.step-ind{font-size:13px;color:var(--muted)}
-.btn-back{height:38px;padding:0 1.1rem;background:transparent;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13.5px;cursor:pointer;color:var(--muted);font-family:inherit;display:flex;align-items:center;gap:5px}
-.btn-back:hover{background:var(--surface2)}
-.btn-next{height:38px;padding:0 1.3rem;background:var(--orange);border:none;border-radius:var(--radius-sm);font-size:13.5px;font-weight:600;cursor:pointer;color:#fff;font-family:inherit;display:flex;align-items:center;gap:5px}
-.btn-next:hover{opacity:.88}
-.btn-next:disabled{opacity:.5;cursor:not-allowed}
-.btn-submit{background:var(--green)}
-
-/* Success */
-.success-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem 1.5rem;text-align:center;box-shadow:var(--shadow)}
-.success-icon{width:56px;height:56px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:26px}
-.success-title{font-size:20px;font-weight:700;margin-bottom:6px}
-.success-sub{font-size:13.5px;color:var(--muted);margin-bottom:1.25rem;max-width:380px;margin-left:auto;margin-right:auto}
-.ref-badge{display:inline-block;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 18px;font-size:14px;font-family:'Courier New',monospace;color:var(--muted);letter-spacing:.06em}
-
-/* ── DASHBOARD ── */
-#dashView{padding:1.5rem;max-width:1200px;margin:0 auto}
-.dash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px}
-.dash-title{font-size:20px;font-weight:700}
-.dash-sub{font-size:13px;color:var(--muted);margin-top:2px}
-.dash-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn-sm{height:34px;padding:0 1rem;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;border:none;transition:all .15s}
-.btn-primary{background:var(--orange);color:#fff}
-.btn-primary:hover{opacity:.88}
-.btn-secondary{background:var(--surface);border:1px solid var(--border2);color:var(--text)}
-.btn-secondary:hover{background:var(--surface2)}
-.btn-danger{background:var(--red-light);color:var(--red);border:1px solid rgba(192,57,43,0.2)}
-.btn-danger:hover{background:rgba(192,57,43,0.15)}
-
-/* Stats row */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;box-shadow:var(--shadow)}
-.stat-val{font-size:26px;font-weight:700;color:var(--text);line-height:1}
-.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
-.stat-accent{color:var(--orange)}
-
-/* Search/filter bar */
-.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem;margin-bottom:1rem;display:flex;gap:10px;flex-wrap:wrap;align-items:center;box-shadow:var(--shadow)}
-.filter-bar input,.filter-bar select{height:34px;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:0 10px;font-size:13px;font-family:inherit;background:var(--surface2);color:var(--text);outline:none}
-.filter-bar input{flex:1;min-width:180px}
-.filter-bar input:focus,.filter-bar select:focus{border-color:var(--orange)}
-
-/* Table */
-.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
-.data-table{width:100%;border-collapse:collapse}
-.data-table th{background:var(--charcoal);color:rgba(255,255,255,0.8);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:10px 14px;text-align:left;white-space:nowrap}
-.data-table td{padding:11px 14px;font-size:13.5px;border-bottom:1px solid var(--border);vertical-align:middle}
-.data-table tr:last-child td{border-bottom:none}
-.data-table tr:hover td{background:var(--surface2)}
-.data-table .name-cell{font-weight:600;color:var(--text)}
-.data-table .trade-badge{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:2px 8px;font-size:11.5px;color:var(--muted)}
-.data-table .actions{display:flex;gap:6px}
-.icon-btn{width:30px;height:30px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;color:var(--muted)}
-.icon-btn:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-light)}
-.icon-btn.pdf-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-light)}
-.empty-state{padding:3rem;text-align:center;color:var(--muted)}
-.empty-icon{font-size:36px;margin-bottom:.75rem}
-.empty-text{font-size:14px}
-
-/* Status badge */
-.status-badge{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:2px 9px;font-size:11.5px;font-weight:600}
-.status-new{background:var(--blue-light);color:var(--blue)}
-.status-ok{background:var(--green-light);color:var(--green)}
-.status-flag{background:var(--red-light);color:var(--red)}
-
-/* ── MODAL / DETAIL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
-.modal-overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:680px;box-shadow:var(--shadow-lg);overflow:hidden;margin:auto}
-.modal-header{background:var(--charcoal);padding:1.1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
-.modal-title{color:#fff;font-weight:700;font-size:16px}
-.modal-close{background:none;border:none;color:rgba(255,255,255,0.6);font-size:20px;cursor:pointer;line-height:1;padding:4px}
-.modal-close:hover{color:#fff}
-.modal-body{padding:1.5rem;max-height:75vh;overflow-y:auto}
-.detail-section{margin-bottom:1.25rem}
-.detail-section-title{font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--orange);text-transform:uppercase;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.detail-field label{font-size:11px;color:var(--muted2);display:block;margin-bottom:2px}
-.detail-field span{font-size:13.5px;color:var(--text);font-weight:500}
-.detail-full{grid-column:1/-1}
-.files-list{display:flex;flex-direction:column;gap:6px}
-.file-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px}
-.file-item .fi-icon{font-size:18px;flex-shrink:0}
-.file-item .fi-name{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file-item .fi-size{color:var(--muted2);font-size:11.5px}
-.file-item .fi-view{background:var(--orange);color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit}
-.hs-check{display:flex;align-items:center;gap:6px;font-size:13px;padding:3px 0}
-.hs-check .tick{color:var(--green);font-size:15px}
-.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface2)}
-
-/* ── EMAIL CONFIG ── */
-#emailConfig{padding:1.5rem;max-width:560px;margin:0 auto}
-.config-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem}
-.config-title{font-size:16px;font-weight:700;margin-bottom:.25rem}
-.config-sub{font-size:13px;color:var(--muted);margin-bottom:1.25rem}
-.config-row{margin-bottom:1rem}
-.config-row label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:500}
-.config-row input,.config-row select,.config-row textarea{width:100%;padding:0 11px;height:38px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:14px;font-family:inherit;outline:none}
-.config-row input:focus,.config-row select:focus{border-color:var(--orange)}
-.info-box{background:var(--blue-light);border-left:3px solid var(--blue);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:.75rem 1rem;font-size:13px;color:#1a237e;margin-bottom:1rem;line-height:1.6}
-.info-box a{color:var(--blue);font-weight:600}
-.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0}
-.toggle-label{font-size:14px;color:var(--text)}
-.toggle-sub{font-size:12px;color:var(--muted)}
-.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:99px;cursor:pointer;transition:.2s}
-.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-.toggle input:checked+.toggle-slider{background:var(--orange)}
-.toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
-
-@media(max-width:600px){
-  .field-grid{grid-template-columns:1fr}
-  .stats-row{grid-template-columns:1fr 1fr}
-  .detail-grid{grid-template-columns:1fr}
-  .filter-bar{flex-direction:column}
-  .filter-bar input,.filter-bar select{width:100%}
-}
-@media print{
-  .top-nav,.form-nav,.dash-actions,.filter-bar,.dash-header .dash-actions{display:none!important}
-  body{background:#fff}
-}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;display:flex;flex-direction:column}
+.shell{display:flex;flex:1;overflow:hidden}
+.sidebar{width:224px;background:var(--ch);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-brand{padding:1.25rem 1rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08)}
+.sb-logo{width:36px;height:36px;background:var(--or);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;margin-bottom:.6rem}
+.sb-name{color:#fff;font-size:14px;font-weight:600;line-height:1.2}
+.sb-site{color:rgba(255,255,255,0.38);font-size:11px;margin-top:2px}
+.sb-sec{padding:.75rem 0 .25rem}
+.sb-lbl{padding:0 1rem .4rem;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.28)}
+.ni{display:flex;align-items:center;gap:10px;padding:.6rem 1rem;cursor:pointer;color:rgba(255,255,255,0.58);font-size:13px;transition:all .15s;border-left:2px solid transparent}
+.ni:hover{color:#fff;background:rgba(255,255,255,0.06)}
+.ni.active{color:#fff;background:rgba(232,101,10,0.15);border-left-color:var(--or)}
+.ni i{font-size:17px;flex-shrink:0}
+.nb{margin-left:auto;background:var(--or);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700}
+.sb-foot{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.08)}
+.sb-foot-tx{color:rgba(255,255,255,0.28);font-size:11px;line-height:1.6}
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{height:54px;background:var(--sf);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 1.5rem;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:50}
+.tb-ttl{font-size:15px;font-weight:600}.tb-sub{font-size:12px;color:var(--tx3);margin-top:1px}
+.tb-act{margin-left:auto;display:flex;gap:8px;align-items:center}
+.view{display:none;flex:1;padding:1.5rem}.view.active{display:block}
+.btn{height:34px;padding:0 1rem;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;border:none;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--or);color:#fff}.btn-primary:hover{background:var(--ord)}
+.btn-secondary{background:var(--sf);color:var(--tx);border:1px solid var(--bd2)}.btn-secondary:hover{background:var(--sf2)}
+.btn-ghost{background:transparent;color:var(--tx2);border:1px solid var(--bd)}.btn-ghost:hover{background:var(--sf2)}
+.btn-danger{background:var(--rdl);color:var(--rd);border:1px solid rgba(192,57,43,0.2)}
+.btn-success{background:var(--gn);color:#fff}
+.btn-lg{height:40px;padding:0 1.25rem;font-size:14px}
+.btn-sm{height:28px;padding:0 .75rem;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.ib{width:32px;height:32px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;color:var(--tx3)}
+.ib:hover{border-color:var(--or);color:var(--or);background:var(--orll)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1.25rem 1.5rem}
+.shd{font-size:11px;font-weight:600;letter-spacing:.07em;color:var(--or);text-transform:uppercase;margin-bottom:.875rem;display:flex;align-items:center;gap:6px}
+.shd i{font-size:14px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem}
+.stat{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1.1rem 1.25rem;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.stat-a::before{background:var(--or)}.stat-b::before{background:var(--bl)}.stat-c::before{background:var(--gn)}.stat-d::before{background:var(--am)}
+.sv{font-size:28px;font-weight:700;line-height:1;color:var(--tx)}
+.sl{font-size:12px;color:var(--tx3);margin-top:5px}
+.tcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.ttb{padding:.875rem 1.25rem;border-bottom:1px solid var(--bd);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ttb input,.ttb select{height:32px;border:1px solid var(--bd2);border-radius:var(--r);padding:0 10px;font-size:13px;font-family:inherit;background:var(--sf2);color:var(--tx);outline:none}
+.ttb input{width:220px}.ttb input:focus,.ttb select:focus{border-color:var(--or)}
+.tbl-act{margin-left:auto;display:flex;gap:6px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--sf3);color:var(--tx3);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:9px 14px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--bd)}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--bd);vertical-align:middle;color:var(--tx)}
+tr:last-child td{border-bottom:none}tr:hover td{background:var(--sf2)}
+.wn{font-weight:600;font-size:13.5px}.wr{font-size:11px;color:var(--tx3);margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:3px;border-radius:99px;padding:2px 8px;font-size:11.5px;font-weight:500}
+.b-trade{background:var(--sf3);color:var(--tx2);border:1px solid var(--bd)}
+.b-new{background:var(--bll);color:var(--bl)}.b-ok{background:var(--gnl);color:var(--gn)}.b-flag{background:var(--rdl);color:var(--rd)}.b-or{background:var(--orl);color:var(--ord)}
+.row-act{display:flex;gap:4px}
+.empty{padding:3.5rem 1.5rem;text-align:center;color:var(--tx3)}
+.empty i{font-size:40px;display:block;margin-bottom:.75rem;opacity:.4}
+.et{font-size:15px;font-weight:500;margin-bottom:.25rem;color:var(--tx2)}
+.es{font-size:13px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;padding:1.5rem}
+.overlay.open{display:flex}
+.modal{background:var(--sf);border-radius:var(--rxl);width:100%;max-width:700px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.mh{background:var(--ch);padding:1.1rem 1.5rem;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mhi{width:32px;height:32px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0}
+.mt{color:#fff;font-weight:600;font-size:15px}.mr{color:rgba(255,255,255,0.45);font-size:12px;margin-top:1px}
+.mc{margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;line-height:1;padding:4px;border-radius:4px}
+.mc:hover{color:#fff}
+.mb{overflow-y:auto;padding:1.25rem 1.5rem;flex:1}
+.mf{padding:.875rem 1.5rem;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;background:var(--sf2);flex-shrink:0}
+.ds{margin-bottom:1.25rem}
+.dt{font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--or);text-transform:uppercase;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--bd)}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.df label{font-size:11px;color:var(--tx3);display:block;margin-bottom:2px}
+.df span{font-size:13.5px;color:var(--tx);font-weight:500}
+.df-full{grid-column:1/-1}
+.hs-list{display:flex;flex-direction:column;gap:5px}
+.hs-row{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--tx2)}
+.hs-row i{font-size:14px;flex-shrink:0;margin-top:1px}
+.fl{display:flex;flex-direction:column;gap:6px}
+.fr{display:flex;align-items:center;gap:9px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 10px}
+.fr i{font-size:20px;color:var(--tx3);flex-shrink:0}
+.fn{flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fs_{font-size:11px;color:var(--tx3)}
+.fv{background:var(--or);color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit}
+#formView{padding:1.5rem 1rem 4rem;max-width:660px;margin:0 auto}
+.fhdr{background:var(--ch);border-radius:var(--rl);padding:1.5rem 1.75rem;margin-bottom:1.5rem}
+.fht{display:flex;align-items:center;gap:10px;margin-bottom:.875rem}
+.fhl{width:34px;height:34px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px}
+.fhco{color:rgba(255,255,255,0.65);font-size:13px}
+.fhtitle{color:#fff;font-size:20px;font-weight:700;margin-bottom:3px}
+.fhsub{color:rgba(255,255,255,0.4);font-size:12px}
+.prog{display:flex;gap:4px;margin-top:1.1rem}
+.ps{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.15);transition:background .3s}
+.ps.active{background:var(--or)}.ps.done{background:rgba(255,255,255,0.45)}
+.fsec{display:none}.fsec.visible{display:block}
+.nb-w{background:var(--orl);border-left:3px solid var(--or);border-radius:0 var(--r) var(--r) 0;padding:.7rem 1rem;margin-bottom:1rem;font-size:13px;line-height:1.6}
+.nb-i{background:var(--bll);border-left:3px solid var(--bl);border-radius:0 var(--r) var(--r) 0;padding:.7rem 1rem;font-size:13px;line-height:1.6}
+.fi{margin-bottom:.875rem}.fi:last-child{margin-bottom:0}
+.fl_{display:block;font-size:12px;color:var(--tx2);margin-bottom:4px;font-weight:500}
+.fl_ .rq{color:var(--or)}
+.fi input[type=text],.fi input[type=email],.fi input[type=tel],.fi input[type=date],.fi select,.fi textarea{width:100%;padding:0 11px;height:38px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sf2);color:var(--tx);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(232,101,10,0.1)}
+.fi textarea{height:78px;padding:9px 11px;resize:vertical}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ckg{display:flex;flex-direction:column;gap:8px}
+.cki{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
+.cki input{margin-top:3px;accent-color:var(--or);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.cki span{font-size:13.5px;line-height:1.55;color:var(--tx)}
+.rr{display:flex;gap:1rem;margin-top:5px}
+.ri{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13.5px}
+.ri input{accent-color:var(--or);width:15px;height:15px;cursor:pointer}
+.uz{border:2px dashed var(--bd2);border-radius:var(--rl);padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--sf2)}
+.uz:hover,.dov{border-color:var(--or)!important;background:var(--orll)!important}
+.uz input[type=file]{display:none}
+.ufiles{margin-top:.75rem;display:flex;flex-direction:column;gap:6px}
+.uf{display:flex;align-items:center;gap:8px;background:var(--gnl);border:1px solid rgba(45,122,58,0.2);border-radius:var(--r);padding:6px 10px;font-size:12.5px}
+.ufn{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ufs{color:var(--tx3);font-size:11px}
+.ufr{background:none;border:none;color:var(--rd);cursor:pointer;font-size:14px;padding:0 2px}
+.sw{border:1px solid var(--bd2);border-radius:var(--r);overflow:hidden}
+.sc{display:block;width:100%;height:120px;cursor:crosshair;background:var(--sf2);touch-action:none}
+.sf_{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-top:1px solid var(--bd);background:var(--sf2)}
+.sh{font-size:11px;color:var(--tx3)}
+.fnav{display:flex;justify-content:space-between;align-items:center;margin-top:1.1rem}
+.si{font-size:12px;color:var(--tx3)}
+.sc-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:2.5rem 1.5rem;text-align:center}
+.sci{width:56px;height:56px;border-radius:50%;background:var(--gnl);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:26px;color:var(--gn)}
+.sct{font-size:20px;font-weight:700;margin-bottom:6px}
+.scs{font-size:13.5px;color:var(--tx3);max-width:380px;margin:0 auto 1.25rem}
+.rp{display:inline-block;background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r);padding:6px 18px;font-size:13.5px;font-family:'Courier New',monospace;color:var(--tx2);letter-spacing:.06em}
+#settingsView{padding:1.5rem;max-width:640px}
+.ss{margin-bottom:1.5rem}
+.sti{font-size:15px;font-weight:600;margin-bottom:.25rem}
+.ssu{font-size:13px;color:var(--tx3);margin-bottom:1.25rem}
+.sr_{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--bd)}
+.sr_:last-child{border-bottom:none}
+.srl{font-size:14px;color:var(--tx)}.srs{font-size:12px;color:var(--tx3);margin-top:2px}
+.tgl{position:relative;width:40px;height:22px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgls{position:absolute;inset:0;background:var(--bd2);border-radius:99px;cursor:pointer;transition:.2s}
+.tgls::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tgl input:checked+.tgls{background:var(--or)}
+.tgl input:checked+.tgls::before{transform:translateX(18px)}
+.ci{width:100%;padding:0 11px;height:38px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sf2);color:var(--tx);font-size:13.5px;font-family:inherit;outline:none;margin-top:5px}
+.ci:focus{border-color:var(--or)}
+.gc{border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;margin-bottom:1rem}
+.gch{background:var(--sf3);padding:.875rem 1.25rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)}
+.gci{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.gcht{font-size:14px;font-weight:600}.gchs{font-size:12px;color:var(--tx3);margin-top:1px}
+.gcst{margin-left:auto}
+.gcb{padding:1.25rem}
+.gcc{display:flex;align-items:center;gap:10px;background:var(--gnl);border:1px solid rgba(45,122,58,0.2);border-radius:var(--r);padding:.75rem 1rem;font-size:13.5px;color:var(--gn);font-weight:500}
+.sl-list{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem}
+.sl-item{display:flex;gap:12px;align-items:flex-start}
+.sl-num{width:24px;height:24px;border-radius:50%;background:var(--or);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.sl-tx{font-size:13.5px;color:var(--tx);line-height:1.55}
+.sl-tx code{background:var(--sf3);border:1px solid var(--bd);border-radius:4px;padding:1px 5px;font-size:12px;font-family:'Courier New',monospace}
+@media(max-width:700px){.sidebar{display:none}.stats-grid{grid-template-columns:1fr 1fr}.fg{grid-template-columns:1fr}.dg{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
-<!-- TOP NAV -->
-<nav class="top-nav">
-  <div class="nav-brand">
-    <div class="nav-logo">A</div>
-    <div>
-      <div class="nav-name">Antvic Ltd</div>
-    </div>
+<div class="shell">
+<nav class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">A</div>
+    <div class="sb-name">Antvic Ltd</div>
+    <div class="sb-site">Caldecotte Lake · MK7 8LF</div>
   </div>
-  <button class="nav-btn active" onclick="showView('form')" id="navForm">📋 Induction Form</button>
-  <button class="nav-btn" onclick="showView('dash')" id="navDash">📊 Dashboard <span class="nav-pill" id="navCount">0</span></button>
-  <button class="nav-btn" onclick="showView('email')" id="navEmail">⚙️ Settings</button>
+  <div class="sb-sec">
+    <div class="sb-lbl">Management</div>
+    <div class="ni active" id="nav-dash" onclick="showView('dash')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard <span class="nb" id="navCount">0</span></div>
+    <div class="ni" id="nav-form" onclick="showView('form')"><i class="ti ti-clipboard-plus" aria-hidden="true"></i> New Induction</div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">System</div>
+    <div class="ni" id="nav-settings" onclick="showView('settings')"><i class="ti ti-settings" aria-hidden="true"></i> Settings</div>
+    <div class="ni" id="nav-email" onclick="showView('email')"><i class="ti ti-mail" aria-hidden="true"></i> Email Setup</div>
+  </div>
+  <div class="sb-foot"><div class="sb-foot-tx">Site Induction System v2.0<br>Data stored locally in browser</div></div>
 </nav>
-
-<!-- ═══════════════════════════════════════════ FORM VIEW ═══ -->
-<div id="formView" class="view active">
-  <div class="form-header">
-    <div class="fh-logo">
-      <div class="fh-logobox">A</div>
-      <span class="fh-co">Antvic Ltd</span>
-    </div>
-    <div class="fh-title">Site Induction Form</div>
-    <div class="fh-sub">Caldecotte Lake Business Park · Milton Keynes MK7 8LF · Complete all sections before site access</div>
-    <div class="progress-bar">
-      <div class="progress-step active" id="ps1"></div>
-      <div class="progress-step" id="ps2"></div>
-      <div class="progress-step" id="ps3"></div>
-      <div class="progress-step" id="ps4"></div>
-      <div class="progress-step" id="ps5"></div>
-      <div class="progress-step" id="ps6"></div>
-    </div>
-  </div>
-
-  <!-- STEP 1 -->
-  <div class="form-section visible" id="fs1">
-    <div class="card">
-      <div class="section-label">👤 Personal Details</div>
-      <div class="field-grid">
-        <div class="field"><label class="field-label">First name <span class="req">*</span></label><input type="text" id="fname" placeholder="John"/></div>
-        <div class="field"><label class="field-label">Last name <span class="req">*</span></label><input type="text" id="lname" placeholder="Smith"/></div>
-      </div>
-      <div class="field-grid">
-        <div class="field"><label class="field-label">Date of birth <span class="req">*</span></label><input type="date" id="dob"/></div>
-        <div class="field"><label class="field-label">National Insurance No.</label><input type="text" id="ni" placeholder="AB 12 34 56 C"/></div>
-      </div>
-      <div class="field-grid">
-        <div class="field"><label class="field-label">Mobile <span class="req">*</span></label><input type="tel" id="mobile" placeholder="+44 7700 000000"/></div>
-        <div class="field"><label class="field-label">Email <span class="req">*</span></label><input type="email" id="email" placeholder="john@email.com"/></div>
-      </div>
-      <div class="field-grid">
-        <div class="field"><label class="field-label">Emergency contact name <span class="req">*</span></label><input type="text" id="ecname"/></div>
-        <div class="field"><label class="field-label">Emergency contact phone <span class="req">*</span></label><input type="tel" id="ectel"/></div>
-      </div>
-      <div class="field"><label class="field-label">Employer / company <span class="req">*</span></label><input type="text" id="employer" placeholder="Subcontractor Ltd"/></div>
-      <div class="field"><label class="field-label">Trade / role <span class="req">*</span></label>
-        <select id="trade"><option value="">— select —</option><option>Bricklayer</option><option>Carpenter / joiner</option><option>Electrician</option><option>Plumber / mechanical</option><option>Plasterer</option><option>Painter / decorator</option><option>Groundworker</option><option>Steel fixer</option><option>Plant operator</option><option>Labourer</option><option>Site manager / supervisor</option><option>Other</option></select>
-      </div>
-      <div class="field"><label class="field-label">Start date on site <span class="req">*</span></label><input type="date" id="startdate"/></div>
-    </div>
-    <div class="form-nav"><span class="step-ind">Step 1 of 6</span><button class="btn-next" onclick="goTo(2)">Next →</button></div>
-  </div>
-
-  <!-- STEP 2 -->
-  <div class="form-section" id="fs2">
-    <div class="card">
-      <div class="section-label">🎓 Qualifications & Right to Work</div>
-      <div class="field"><label class="field-label">CSCS card type <span class="req">*</span></label>
-        <select id="cscs_type"><option value="">— select —</option><option>Green — Labourer</option><option>Blue — Skilled Worker</option><option>Gold — Supervisor</option><option>Black — Manager</option><option>White — Academically qualified</option><option>Red — Trainee</option><option>No card held</option></select>
-      </div>
-      <div class="field-grid">
-        <div class="field"><label class="field-label">CSCS card number</label><input type="text" id="cscs_num"/></div>
-        <div class="field"><label class="field-label">CSCS expiry date</label><input type="date" id="cscs_exp"/></div>
-      </div>
-      <div class="field"><label class="field-label">Additional cards / tickets (tick all that apply)</label>
-        <div class="check-group" style="margin-top:6px">
-          <label class="check-item"><input type="checkbox" class="card-cb"/><span>CPCS (plant operations)</span></label>
-          <label class="check-item"><input type="checkbox" class="card-cb"/><span>IPAF (powered access)</span></label>
-          <label class="check-item"><input type="checkbox" class="card-cb"/><span>PASMA (mobile scaffold towers)</span></label>
-          <label class="check-item"><input type="checkbox" class="card-cb"/><span>First Aid at Work (FAW)</span></label>
-          <label class="check-item"><input type="checkbox" class="card-cb"/><span>Asbestos awareness (Cat A)</span></label>
-          <label class="check-item"><input type="checkbox" class="card-cb"/><span>Manual handling</span></label>
-          <label class="check-item"><input type="checkbox" class="card-cb"/><span>Working at height</span></label>
-        </div>
-      </div>
-      <div class="field"><label class="field-label">Legal right to work in UK? <span class="req">*</span></label>
-        <div class="radio-group"><label class="radio-item"><input type="radio" name="rtw" value="Yes"/>Yes</label><label class="radio-item"><input type="radio" name="rtw" value="No"/>No</label></div>
-      </div>
-      <div class="field"><label class="field-label">ID document provided to site manager <span class="req">*</span></label>
-        <select id="id_type"><option value="">— select —</option><option>UK Passport</option><option>Non-UK Passport + Visa / BRP</option><option>UK Driving Licence</option><option>Biometric Residence Permit</option><option>Share code</option><option>Other</option></select>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-label">📎 Document Uploads</div>
-      <div class="note-box" style="margin-bottom:.75rem">Upload copies of your ID, CSCS card, and any other relevant certificates. Accepted: images (JPG, PNG) and PDFs. Max 10MB per file.</div>
-      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)">
-        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx" onchange="handleFiles(this.files)"/>
-        <div class="upload-icon">📁</div>
-        <div class="upload-label"><strong>Click to upload</strong> or drag and drop<br>ID card, CSCS card, certificates, site photos</div>
-      </div>
-      <div class="uploaded-files" id="uploadedFiles"></div>
-    </div>
-    <div class="form-nav"><button class="btn-back" onclick="goTo(1)">← Back</button><span class="step-ind">Step 2 of 6</span><button class="btn-next" onclick="goTo(3)">Next →</button></div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div class="form-section" id="fs3">
-    <div class="card">
-      <div class="section-label">🛡 Health & Safety Rules</div>
-      <div class="note-box">Please read each statement carefully and tick to confirm you understand and agree to comply. All boxes must be ticked before you can proceed.</div>
-      <div class="check-group" id="hsChecks">
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I have been briefed on site-specific risk assessments and method statements (RAMS) relevant to my scope of work.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I will wear required PPE at all times: hard hat, hi-vis vest (min. class 2), safety boots (steel toe &amp; midsole), gloves, and safety glasses / RPE where required.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I will not enter any area that has not been designated safe or is beyond my authorised access level.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I understand all site exclusion zones, barriers, and signage and will comply at all times.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I will report any unsafe conditions, near misses, incidents, or accidents immediately to the site manager.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I will not use a mobile phone or headphones in active work areas or when operating plant and machinery.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I am not under the influence of alcohol, drugs, or any substance that may impair my judgement. These are strictly prohibited on site.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I will keep my work area clean and dispose of all waste in designated skips/bins.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I will not carry out any task for which I am not trained, instructed, or hold the required qualification.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I have received a fire evacuation briefing and know the location of fire points, extinguishers, and the fire assembly point.</span></label>
-        <label class="check-item"><input type="checkbox" class="hs"/><span>I understand that toolbox talks and safety briefings are mandatory and I will attend all relevant sessions.</span></label>
-      </div>
-    </div>
-    <div class="form-nav"><button class="btn-back" onclick="goTo(2)">← Back</button><span class="step-ind">Step 3 of 6</span><button class="btn-next" onclick="goTo(4)">Next →</button></div>
-  </div>
-
-  <!-- STEP 4 -->
-  <div class="form-section" id="fs4">
-    <div class="card">
-      <div class="section-label">🏥 Health Declarations</div>
-      <div class="field"><label class="field-label">Do you have any medical conditions that may affect your ability to work safely on site? <span class="req">*</span></label>
-        <div class="radio-group"><label class="radio-item"><input type="radio" name="med" value="Yes"/>Yes</label><label class="radio-item"><input type="radio" name="med" value="No"/>No</label></div>
-      </div>
-      <div class="field"><label class="field-label">If yes, please provide brief details (kept strictly confidential)</label><textarea id="med_detail" placeholder="e.g. epilepsy, diabetes, hearing impairment..."></textarea></div>
-      <div class="field"><label class="field-label">Do you have any allergies we should be aware of? <span class="req">*</span></label>
-        <div class="radio-group"><label class="radio-item"><input type="radio" name="allergy" value="Yes"/>Yes</label><label class="radio-item"><input type="radio" name="allergy" value="No"/>No</label></div>
-      </div>
-      <div class="field"><label class="field-label">If yes, please specify</label><input type="text" id="allergy_detail" placeholder="e.g. latex, dust, penicillin"/></div>
-    </div>
-    <div class="card">
-      <div class="section-label">📋 Site Rules & Conduct</div>
-      <div class="check-group">
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I will sign in and out of the site register every day without exception.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I understand site working hours are Mon–Fri 07:30–18:00 and Sat 08:00–13:00, unless otherwise agreed in writing.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I will not permit any unauthorised person to enter the site.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I will park only in designated areas and comply with the site traffic management plan. Site speed limit is 5mph.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I will treat all workers, staff, and visitors with respect. Bullying, harassment, or discrimination will result in immediate removal from site.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I will not take photographs or video on site without prior written authorisation from the site manager.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I will segregate waste correctly: general, recyclable, and hazardous into designated containers.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I will not pour liquids, paints, solvents, or chemicals into drains, watercourses, or onto the ground.</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I am aware of the locations of: site toilets, welfare/canteen, first aid station, and fire assembly point (Car park — south gate).</span></label>
-        <label class="check-item"><input type="checkbox" class="sr"/><span>I confirm I have been shown the location of the fire assembly point and understand the evacuation procedure.</span></label>
-      </div>
-    </div>
-    <div class="form-nav"><button class="btn-back" onclick="goTo(3)">← Back</button><span class="step-ind">Step 4 of 6</span><button class="btn-next" onclick="goTo(5)">Next →</button></div>
-  </div>
-
-  <!-- STEP 5 -->
-  <div class="form-section" id="fs5">
-    <div class="card">
-      <div class="section-label">✍️ Declaration & Signature</div>
-      <div class="note-box">By signing below I confirm that I have read, understood, and agree to comply with all site rules and H&amp;S requirements. I acknowledge this induction does not replace any specific RAMS briefing required for my scope of work.</div>
-      <div class="field" style="margin-top:.75rem"><label class="field-label">Full name (as declaration) <span class="req">*</span></label><input type="text" id="decl_name" placeholder="John Smith"/></div>
-      <div class="field"><label class="field-label">Date <span class="req">*</span></label><input type="date" id="decl_date"/></div>
-      <div class="field"><label class="field-label">Signature <span class="req">*</span></label>
-        <div class="sig-wrap">
-          <canvas class="sig-canvas" id="sigCanvas" width="620" height="120"></canvas>
-          <div class="sig-footer"><span class="sig-hint">Draw with mouse, stylus, or finger</span><button class="btn-clear-sig" onclick="clearSig()">Clear</button></div>
-        </div>
-      </div>
-      <div class="field"><label class="field-label">Additional comments for site team</label><textarea id="comments" placeholder="Any information the site manager should know..."></textarea></div>
-    </div>
-    <div class="form-nav"><button class="btn-back" onclick="goTo(4)">← Back</button><span class="step-ind">Step 5 of 6</span><button class="btn-next" onclick="goTo(6)">Next →</button></div>
-  </div>
-
-  <!-- STEP 6 — Review -->
-  <div class="form-section" id="fs6">
-    <div class="card">
-      <div class="section-label">👁 Review & Submit</div>
-      <div id="reviewContent" style="font-size:13.5px;line-height:2;color:var(--text)"></div>
-    </div>
-    <div class="form-nav"><button class="btn-back" onclick="goTo(5)">← Back</button><span class="step-ind">Step 6 of 6</span><button class="btn-next btn-submit" id="submitBtn" onclick="submitForm()">✅ Submit Induction</button></div>
-  </div>
-
-  <!-- SUCCESS -->
-  <div class="form-section" id="fsSuccess">
-    <div class="success-card">
-      <div class="success-icon">✅</div>
-      <div class="success-title">Induction Complete</div>
-      <div class="success-sub">Your site induction has been recorded. Please report to the site office to collect your worker pass before proceeding to your work area.</div>
-      <div class="ref-badge" id="refCode">ATV-MK-0000</div>
-      <p style="font-size:12px;color:var(--muted);margin-top:1rem;margin-bottom:1.25rem">Caldecotte Lake Business Park — <span id="doneDate"></span></p>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <button class="btn-sm btn-primary" onclick="downloadMyPDF()">⬇️ Download my PDF</button>
-        <button class="btn-sm btn-secondary" onclick="resetForm()">Submit another</button>
-      </div>
-    </div>
+<div class="main">
+<div class="topbar">
+  <div><div class="tb-ttl" id="topbarTitle">Dashboard</div><div class="tb-sub">Caldecotte Lake Business Park · Antvic Ltd</div></div>
+  <div class="tb-act" id="topbarActions">
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i> CSV</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportAllPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> Export PDFs</button>
+    <button class="btn btn-primary btn-sm" onclick="showView('form')"><i class="ti ti-plus" aria-hidden="true"></i> New Induction</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════ DASHBOARD ═══ -->
-<div id="dashView" class="view">
-  <div style="padding:1.5rem;max-width:1200px;margin:0 auto">
-    <div class="dash-header">
-      <div><div class="dash-title">Site Induction Dashboard</div><div class="dash-sub">Caldecotte Lake Business Park · Antvic Ltd</div></div>
-      <div class="dash-actions">
-        <button class="btn-sm btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
-        <button class="btn-sm btn-secondary" onclick="exportAllPDF()">📄 Export all PDFs</button>
-        <button class="btn-sm btn-primary" onclick="showView('form')">+ New Induction</button>
-      </div>
+<!-- DASHBOARD -->
+<div class="view active" id="dashView">
+  <div class="stats-grid">
+    <div class="stat stat-a"><div class="sv" id="statTotal">0</div><div class="sl">Total inductions</div></div>
+    <div class="stat stat-b"><div class="sv" id="statToday">0</div><div class="sl">Today</div></div>
+    <div class="stat stat-c"><div class="sv" id="statWeek">0</div><div class="sl">This week</div></div>
+    <div class="stat stat-d"><div class="sv" id="statFiles">0</div><div class="sl">Files uploaded</div></div>
+  </div>
+  <div class="tcard">
+    <div class="ttb">
+      <i class="ti ti-search" style="color:var(--tx3);font-size:16px" aria-hidden="true"></i>
+      <input type="text" id="searchInput" placeholder="Search name, trade, employer, ref..." oninput="renderTable()"/>
+      <select id="filterTrade" onchange="renderTable()"><option value="">All trades</option><option>Bricklayer</option><option>Carpenter / joiner</option><option>Electrician</option><option>Plumber / mechanical</option><option>Plasterer</option><option>Painter / decorator</option><option>Groundworker</option><option>Steel fixer</option><option>Plant operator</option><option>Labourer</option><option>Site manager / supervisor</option><option>Other</option></select>
+      <select id="filterDate" onchange="renderTable()"><option value="">All time</option><option value="today">Today</option><option value="week">This week</option><option value="month">This month</option></select>
+      <select id="filterStatus" onchange="renderTable()"><option value="">All statuses</option><option value="new">New</option><option value="ok">Approved</option><option value="flag">Flagged</option></select>
+      <div class="tbl-act"><button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i class="ti ti-x" aria-hidden="true"></i> Clear</button></div>
     </div>
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-val stat-accent" id="statTotal">0</div><div class="stat-label">Total inductions</div></div>
-      <div class="stat-card"><div class="stat-val" id="statToday">0</div><div class="stat-label">Today</div></div>
-      <div class="stat-card"><div class="stat-val" id="statWeek">0</div><div class="stat-label">This week</div></div>
-      <div class="stat-card"><div class="stat-val" id="statFiles">0</div><div class="stat-label">Files uploaded</div></div>
-    </div>
-    <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="🔍 Search by name, trade, employer..." oninput="renderTable()"/>
-      <select id="filterTrade" onchange="renderTable()">
-        <option value="">All trades</option>
-        <option>Bricklayer</option><option>Carpenter / joiner</option><option>Electrician</option>
-        <option>Plumber / mechanical</option><option>Plasterer</option><option>Painter / decorator</option>
-        <option>Groundworker</option><option>Steel fixer</option><option>Plant operator</option>
-        <option>Labourer</option><option>Site manager / supervisor</option><option>Other</option>
-      </select>
-      <select id="filterDate" onchange="renderTable()">
-        <option value="">All time</option>
-        <option value="today">Today</option>
-        <option value="week">This week</option>
-        <option value="month">This month</option>
-      </select>
-      <button class="btn-sm btn-secondary" onclick="clearFilters()">Clear</button>
-    </div>
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead><tr>
-          <th>Worker</th><th>Trade</th><th>Employer</th><th>Date</th><th>Files</th><th>Status</th><th>Actions</th>
-        </tr></thead>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Worker</th><th>Trade</th><th>Employer</th><th>Start date</th><th>Submitted</th><th>Files</th><th>H&S</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════ SETTINGS ═══ -->
-<div id="emailView" class="view">
-  <div id="emailConfig">
-    <div class="config-card">
-      <div class="config-title">⚙️ System Settings</div>
-      <div class="config-sub">Configure email notifications and site details.</div>
-      <div class="info-box">
-        Email notifications use <strong>EmailJS</strong> (free, 200 emails/month). 
-        <a href="https://www.emailjs.com" target="_blank">Sign up free</a> → create a service → get your Service ID, Template ID, and Public Key, then paste below.
+<!-- FORM -->
+<div class="view" id="formView">
+  <div class="fhdr">
+    <div class="fht"><div class="fhl">A</div><span class="fhco">Antvic Ltd</span></div>
+    <div class="fhtitle">Site Induction Form</div>
+    <div class="fhsub">Caldecotte Lake Business Park · Milton Keynes MK7 8LF · Complete all sections before accessing site</div>
+    <div class="prog"><div class="ps active" id="ps1"></div><div class="ps" id="ps2"></div><div class="ps" id="ps3"></div><div class="ps" id="ps4"></div><div class="ps" id="ps5"></div><div class="ps" id="ps6"></div></div>
+  </div>
+  <!-- Step 1 -->
+  <div class="fsec visible" id="fs1">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="shd"><i class="ti ti-user" aria-hidden="true"></i> Personal details</div>
+      <div class="fg"><div class="fi"><label class="fl_">First name <span class="rq">*</span></label><input type="text" id="fname" placeholder="John"/></div><div class="fi"><label class="fl_">Last name <span class="rq">*</span></label><input type="text" id="lname" placeholder="Smith"/></div></div>
+      <div class="fg"><div class="fi"><label class="fl_">Date of birth <span class="rq">*</span></label><input type="date" id="dob"/></div><div class="fi"><label class="fl_">National Insurance No.</label><input type="text" id="ni" placeholder="AB 12 34 56 C"/></div></div>
+      <div class="fg"><div class="fi"><label class="fl_">Mobile <span class="rq">*</span></label><input type="tel" id="mobile" placeholder="+44 7700 000000"/></div><div class="fi"><label class="fl_">Email <span class="rq">*</span></label><input type="email" id="email" placeholder="john@email.com"/></div></div>
+      <div class="fg"><div class="fi"><label class="fl_">Emergency contact name <span class="rq">*</span></label><input type="text" id="ecname"/></div><div class="fi"><label class="fl_">Emergency contact phone <span class="rq">*</span></label><input type="tel" id="ectel"/></div></div>
+      <div class="fi"><label class="fl_">Employer / company <span class="rq">*</span></label><input type="text" id="employer" placeholder="Subcontractor Ltd"/></div>
+      <div class="fg">
+        <div class="fi"><label class="fl_">Trade / role <span class="rq">*</span></label><select id="trade"><option value="">— select —</option><option>Bricklayer</option><option>Carpenter / joiner</option><option>Electrician</option><option>Plumber / mechanical</option><option>Plasterer</option><option>Painter / decorator</option><option>Groundworker</option><option>Steel fixer</option><option>Plant operator</option><option>Labourer</option><option>Site manager / supervisor</option><option>Other</option></select></div>
+        <div class="fi"><label class="fl_">Start date on site <span class="rq">*</span></label><input type="date" id="startdate"/></div>
       </div>
-      <div class="config-row"><label>EmailJS Service ID</label><input type="text" id="cfg_service" placeholder="service_xxxxxxx"/></div>
-      <div class="config-row"><label>EmailJS Template ID</label><input type="text" id="cfg_template" placeholder="template_xxxxxxx"/></div>
-      <div class="config-row"><label>EmailJS Public Key</label><input type="text" id="cfg_pubkey" placeholder="your_public_key"/></div>
-      <div class="config-row"><label>Notification email address</label><input type="email" id="cfg_email" placeholder="slajda@gmail.com" value="slajda@gmail.com"/></div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0"/>
-      <div class="toggle-row">
-        <div><div class="toggle-label">Email on each submission</div><div class="toggle-sub">Send notification to the address above</div></div>
-        <label class="toggle"><input type="checkbox" id="tog_email" checked/><span class="toggle-slider"></span></label>
-      </div>
-      <div class="toggle-row">
-        <div><div class="toggle-label">Worker receives confirmation</div><div class="toggle-sub">Send receipt to the worker's email</div></div>
-        <label class="toggle"><input type="checkbox" id="tog_receipt" checked/><span class="toggle-slider"></span></label>
-      </div>
-      <div style="margin-top:1rem"><button class="btn-sm btn-primary" onclick="saveConfig()">💾 Save Settings</button></div>
     </div>
-    <div class="config-card">
-      <div class="config-title">🗄️ Data Management</div>
-      <div class="config-sub">All submissions are stored locally in this browser. Export regularly to back up.</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn-sm btn-secondary" onclick="exportCSV()">📥 Export all as CSV</button>
-        <button class="btn-sm btn-secondary" onclick="exportJSON()">📥 Export as JSON</button>
-        <button class="btn-sm btn-danger" onclick="clearAll()">🗑 Clear all data</button>
+    <div class="fnav"><span class="si">Step 1 of 6</span><button class="btn btn-primary" onclick="goTo(2)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+  </div>
+  <!-- Step 2 -->
+  <div class="fsec" id="fs2">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="shd"><i class="ti ti-certificate" aria-hidden="true"></i> Qualifications & right to work</div>
+      <div class="fi"><label class="fl_">CSCS card type <span class="rq">*</span></label><select id="cscs_type"><option value="">— select —</option><option>Green — Labourer</option><option>Blue — Skilled Worker</option><option>Gold — Supervisor</option><option>Black — Manager</option><option>White — Academically qualified</option><option>Red — Trainee</option><option>No card held</option></select></div>
+      <div class="fg"><div class="fi"><label class="fl_">CSCS card number</label><input type="text" id="cscs_num"/></div><div class="fi"><label class="fl_">CSCS expiry date</label><input type="date" id="cscs_exp"/></div></div>
+      <div class="fi"><label class="fl_">Additional cards / tickets held</label><div class="ckg" style="margin-top:6px"><label class="cki"><input type="checkbox" class="card-cb"/><span>CPCS (plant operations)</span></label><label class="cki"><input type="checkbox" class="card-cb"/><span>IPAF (powered access)</span></label><label class="cki"><input type="checkbox" class="card-cb"/><span>PASMA (mobile scaffold towers)</span></label><label class="cki"><input type="checkbox" class="card-cb"/><span>First Aid at Work (FAW)</span></label><label class="cki"><input type="checkbox" class="card-cb"/><span>Asbestos awareness (Cat A)</span></label><label class="cki"><input type="checkbox" class="card-cb"/><span>Manual handling</span></label><label class="cki"><input type="checkbox" class="card-cb"/><span>Working at height</span></label></div></div>
+      <div class="fi"><label class="fl_">Legal right to work in the UK? <span class="rq">*</span></label><div class="rr"><label class="ri"><input type="radio" name="rtw" value="Yes"/> Yes</label><label class="ri"><input type="radio" name="rtw" value="No"/> No</label></div></div>
+      <div class="fi"><label class="fl_">ID document provided to site manager <span class="rq">*</span></label><select id="id_type"><option value="">— select —</option><option>UK Passport</option><option>Non-UK Passport + Visa / BRP</option><option>UK Driving Licence</option><option>Biometric Residence Permit</option><option>Share code</option><option>Other</option></select></div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="shd"><i class="ti ti-paperclip" aria-hidden="true"></i> Document & photo uploads</div>
+      <div class="nb-i" style="margin-bottom:.875rem">Upload ID, CSCS card, certificates, site photos. Images and PDFs accepted. Max 10MB per file.</div>
+      <div class="uz" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)">
+        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx" onchange="handleFiles(this.files)"/>
+        <div style="font-size:30px;color:var(--tx3);margin-bottom:6px"><i class="ti ti-cloud-upload" aria-hidden="true"></i></div>
+        <div style="font-size:13px;color:var(--tx3)"><strong style="color:var(--or)">Click to upload</strong> or drag and drop<br>ID card · CSCS card · certificates · photos</div>
+      </div>
+      <div class="ufiles" id="uploadedFiles"></div>
+    </div>
+    <div class="fnav"><button class="btn btn-ghost" onclick="goTo(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="si">Step 2 of 6</span><button class="btn btn-primary" onclick="goTo(3)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+  </div>
+  <!-- Step 3 -->
+  <div class="fsec" id="fs3">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="shd"><i class="ti ti-shield-check" aria-hidden="true"></i> Health & safety rules</div>
+      <div class="nb-w">Please read each statement carefully. Tick every box to confirm you understand and agree to comply.</div>
+      <p style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:.75rem">I confirm I understand and will comply: <span style="color:var(--or)">*</span></p>
+      <div class="ckg">
+        <label class="cki"><input type="checkbox" class="hs"/><span>I have been briefed on site-specific RAMS relevant to my scope of work.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I will wear required PPE at all times: hard hat, hi-vis vest (min. class 2), safety boots (steel toe &amp; midsole), gloves, and safety glasses / RPE where required.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I will not enter any area that has not been designated safe or is beyond my authorised access level.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I understand all site exclusion zones, barriers, and signage and will comply at all times.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I will report any unsafe conditions, near misses, incidents, or accidents immediately to the site manager.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I will not use a mobile phone or headphones in active work areas or when operating plant and machinery.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I am not under the influence of alcohol, drugs, or any substance that may impair my judgement. These are strictly prohibited on site.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I will keep my work area clean and dispose of all waste in designated skips/bins.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I will not carry out any task for which I am not trained, instructed, or hold the required qualification.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I have received a fire evacuation briefing and know the location of fire points, extinguishers, and the assembly point.</span></label>
+        <label class="cki"><input type="checkbox" class="hs"/><span>I understand that toolbox talks and safety briefings are mandatory and I will attend all relevant sessions.</span></label>
+      </div>
+    </div>
+    <div class="fnav"><button class="btn btn-ghost" onclick="goTo(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="si">Step 3 of 6</span><button class="btn btn-primary" onclick="goTo(4)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+  </div>
+  <!-- Step 4 -->
+  <div class="fsec" id="fs4">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="shd"><i class="ti ti-first-aid-kit" aria-hidden="true"></i> Health declarations</div>
+      <div class="fi"><label class="fl_">Medical conditions that may affect safe working? <span class="rq">*</span></label><div class="rr"><label class="ri"><input type="radio" name="med" value="Yes"/> Yes</label><label class="ri"><input type="radio" name="med" value="No"/> No</label></div></div>
+      <div class="fi"><label class="fl_">If yes, brief details (kept strictly confidential)</label><textarea id="med_detail" placeholder="e.g. epilepsy, diabetes, hearing impairment..."></textarea></div>
+      <div class="fi"><label class="fl_">Any allergies we should be aware of? <span class="rq">*</span></label><div class="rr"><label class="ri"><input type="radio" name="allergy" value="Yes"/> Yes</label><label class="ri"><input type="radio" name="allergy" value="No"/> No</label></div></div>
+      <div class="fi"><label class="fl_">If yes, please specify</label><input type="text" id="allergy_detail" placeholder="e.g. latex, dust, penicillin"/></div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="shd"><i class="ti ti-map-pin" aria-hidden="true"></i> Site rules & conduct</div>
+      <div class="ckg">
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will sign in and out of the site register every day without exception.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I understand site working hours are Mon–Fri 07:30–18:00 and Sat 08:00–13:00, unless otherwise agreed in writing.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will not permit any unauthorised person to enter the site.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will park only in designated areas and comply with site traffic management. Site speed limit is 5mph.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will treat all workers, staff, and visitors with respect. Bullying, harassment, or discrimination will result in immediate removal from site.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will not take photographs or video on site without prior written authorisation from the site manager.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will not remove any materials, tools, or equipment from site without explicit authorisation.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will segregate waste correctly: general, recyclable, and hazardous into designated containers.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I will not pour liquids, paints, solvents, or chemicals into drains, watercourses, or onto the ground.</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I am aware of site toilets, welfare/canteen, first aid station, and fire assembly point (Car park — south gate).</span></label>
+        <label class="cki"><input type="checkbox" class="sr"/><span>I confirm I have been shown the fire assembly point and understand the evacuation procedure.</span></label>
+      </div>
+    </div>
+    <div class="fnav"><button class="btn btn-ghost" onclick="goTo(3)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="si">Step 4 of 6</span><button class="btn btn-primary" onclick="goTo(5)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+  </div>
+  <!-- Step 5 -->
+  <div class="fsec" id="fs5">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="shd"><i class="ti ti-writing" aria-hidden="true"></i> Declaration & signature</div>
+      <div class="nb-w" style="margin-bottom:.875rem">By signing I confirm I have read, understood, and agree to comply with all site rules and H&S requirements. This induction does not replace any specific RAMS briefing required for my scope of work.</div>
+      <div class="fi"><label class="fl_">Full name (as declaration) <span class="rq">*</span></label><input type="text" id="decl_name" placeholder="John Smith"/></div>
+      <div class="fi"><label class="fl_">Date <span class="rq">*</span></label><input type="date" id="decl_date"/></div>
+      <div class="fi"><label class="fl_">Signature <span class="rq">*</span></label>
+        <div class="sw"><canvas class="sc" id="sigCanvas" width="620" height="120"></canvas><div class="sf_"><span class="sh">Draw with mouse, stylus, or finger</span><button class="btn btn-ghost btn-sm" onclick="clearSig()"><i class="ti ti-refresh" aria-hidden="true"></i> Clear</button></div></div>
+      </div>
+      <div class="fi"><label class="fl_">Additional comments for site team</label><textarea id="comments" placeholder="Any information the site manager should be aware of..."></textarea></div>
+    </div>
+    <div class="fnav"><button class="btn btn-ghost" onclick="goTo(4)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="si">Step 5 of 6</span><button class="btn btn-primary" onclick="goTo(6)">Review <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+  </div>
+  <!-- Step 6 -->
+  <div class="fsec" id="fs6">
+    <div class="card" style="margin-bottom:1rem"><div class="shd"><i class="ti ti-eye" aria-hidden="true"></i> Review & confirm</div><div id="reviewContent"></div></div>
+    <div class="fnav"><button class="btn btn-ghost" onclick="goTo(5)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button><span class="si">Step 6 of 6</span><button class="btn btn-success btn-lg" id="submitBtn" onclick="submitForm()"><i class="ti ti-check" aria-hidden="true"></i> Submit Induction</button></div>
+  </div>
+  <!-- Success -->
+  <div class="fsec" id="fsSuccess">
+    <div class="sc-card">
+      <div class="sci"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+      <div class="sct">Induction complete</div>
+      <div class="scs">Your induction has been recorded. Please report to the site office to collect your worker pass before proceeding to your work area.</div>
+      <div class="rp" id="refCode">ATV-MK-0000</div>
+      <p style="font-size:12px;color:var(--tx3);margin-top:.875rem;margin-bottom:1.25rem">Caldecotte Lake Business Park — <span id="doneDate"></span></p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="downloadMyPDF()"><i class="ti ti-download" aria-hidden="true"></i> Download my PDF</button>
+        <button class="btn btn-ghost" onclick="resetForm()">Submit another</button>
+        <button class="btn btn-ghost" onclick="showView('dash')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- DETAIL MODAL -->
-<div class="modal-overlay" id="detailModal">
+<!-- SETTINGS -->
+<div class="view" id="settingsView">
+  <div style="max-width:640px">
+    <div class="ss"><div class="sti">General</div><div class="ssu">Site and notification preferences.</div>
+      <div class="card">
+        <div class="fi"><label class="fl_">Site name</label><input class="ci" type="text" id="cfg_site" value="Caldecotte Lake Business Park, Milton Keynes MK7 8LF"/></div>
+        <div class="fi" style="margin-top:.75rem"><label class="fl_">Notification email</label><input class="ci" type="email" id="cfg_email" value="slajda@gmail.com"/></div>
+        <div style="margin-top:1rem">
+          <div class="sr_" style="border-top:1px solid var(--bd);padding-top:.75rem"><div><div class="srl">Email notification on submission</div><div class="srs">Send alert when a worker submits</div></div><label class="tgl"><input type="checkbox" id="tog_email" checked/><span class="tgls"></span></label></div>
+          <div class="sr_"><div><div class="srl">Worker receives confirmation</div><div class="srs">Worker gets receipt to their email</div></div><label class="tgl"><input type="checkbox" id="tog_receipt" checked/><span class="tgls"></span></label></div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:1rem" onclick="saveConfig()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save settings</button>
+      </div>
+    </div>
+    <div class="ss"><div class="sti">Data management</div><div class="ssu">All submissions stored in this browser. Export regularly.</div>
+      <div class="card" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="exportCSV()"><i class="ti ti-table-export" aria-hidden="true"></i> Export CSV</button>
+        <button class="btn btn-ghost" onclick="exportJSON()"><i class="ti ti-code" aria-hidden="true"></i> Export JSON</button>
+        <button class="btn btn-ghost" onclick="exportAllPDF()"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> Export all PDFs</button>
+        <button class="btn btn-danger" onclick="clearAll()"><i class="ti ti-trash" aria-hidden="true"></i> Clear all data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL SETUP -->
+<div class="view" id="emailView">
+  <div style="max-width:640px">
+    <div class="ss"><div class="sti">Gmail email integration</div><div class="ssu">Send notifications directly from your Gmail — no third-party service needed.</div></div>
+    <div class="gc">
+      <div class="gch">
+        <div class="gci" style="background:#EA4335">G</div>
+        <div><div class="gcht">Gmail via SMTP.js</div><div class="gchs">Sends from your Gmail using an app password · no backend needed</div></div>
+        <div class="gcst" id="gmailStatus"><span class="badge b-new">Not configured</span></div>
+      </div>
+      <div class="gcb">
+        <div class="nb-i" style="margin-bottom:1rem">Gmail requires an <strong>App Password</strong> — a 16-character code Gmail generates for apps. Your main password is never used. <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--bl)">Generate one here →</a></div>
+        <div class="sl-list">
+          <div class="sl-item"><div class="sl-num">1</div><div class="sl-tx">Go to Google Account → <strong>Security</strong> → enable <strong>2-Step Verification</strong></div></div>
+          <div class="sl-item"><div class="sl-num">2</div><div class="sl-tx">Go to <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--bl)">myaccount.google.com/apppasswords</a> → create app password → name it <code>Antvic Induction</code></div></div>
+          <div class="sl-item"><div class="sl-num">3</div><div class="sl-tx">Copy the 16-character code and paste below with your Gmail address, then click Save & Test</div></div>
+        </div>
+        <div class="fi"><label class="fl_">Your Gmail address</label><input class="ci" type="email" id="gmail_user" placeholder="slajda@gmail.com" value="slajda@gmail.com"/></div>
+        <div class="fi" style="margin-top:.75rem"><label class="fl_">Gmail App Password (16 chars)</label><input class="ci" type="password" id="gmail_pass" placeholder="abcdefghijklmnop"/></div>
+        <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="saveGmail()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save & Test</button>
+          <button class="btn btn-ghost" onclick="clearGmail()"><i class="ti ti-trash" aria-hidden="true"></i> Clear credentials</button>
+        </div>
+        <div id="gmailTestResult" style="margin-top:.75rem;font-size:13px;display:none"></div>
+      </div>
+    </div>
+    <div class="gc" style="margin-top:1rem">
+      <div class="gch">
+        <div class="gci" style="background:var(--or)">E</div>
+        <div><div class="gcht">Alternative: EmailJS</div><div class="gchs">Free · 200 emails/month · no app password needed</div></div>
+      </div>
+      <div class="gcb">
+        <div class="sl-list">
+          <div class="sl-item"><div class="sl-num">1</div><div class="sl-tx">Sign up free at <a href="https://emailjs.com" target="_blank" style="color:var(--bl)">emailjs.com</a> → add Gmail as a service</div></div>
+          <div class="sl-item"><div class="sl-num">2</div><div class="sl-tx">Create an email template using <code>{{worker_name}}</code>, <code>{{trade}}</code>, <code>{{employer}}</code>, <code>{{ref}}</code>, <code>{{date}}</code></div></div>
+          <div class="sl-item"><div class="sl-num">3</div><div class="sl-tx">Copy your Service ID, Template ID, and Public Key and paste below</div></div>
+        </div>
+        <div class="fg">
+          <div class="fi"><label class="fl_">Service ID</label><input class="ci" type="text" id="ejs_service" placeholder="service_xxxxxxx"/></div>
+          <div class="fi"><label class="fl_">Template ID</label><input class="ci" type="text" id="ejs_template" placeholder="template_xxxxxxx"/></div>
+        </div>
+        <div class="fi" style="margin-top:.75rem"><label class="fl_">Public Key</label><input class="ci" type="text" id="ejs_pubkey" placeholder="your_public_key"/></div>
+        <button class="btn btn-ghost" style="margin-top:.875rem" onclick="saveEmailJS()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save EmailJS</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div></div>
+
+<!-- MODAL -->
+<div class="overlay" id="detailModal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Worker Details</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
-    <div class="modal-footer">
-      <button class="btn-sm btn-secondary" onclick="closeModal()">Close</button>
-      <button class="btn-sm btn-primary" onclick="generatePDF(currentRecord)" id="modalPdfBtn">⬇️ Download PDF</button>
-    </div>
+    <div class="mh"><div class="mhi"><i class="ti ti-user" aria-hidden="true"></i></div><div><div class="mt" id="modalTitle">Worker record</div><div class="mr" id="modalRef"></div></div><button class="mc" onclick="closeModal()"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+    <div class="mb" id="modalBody"></div>
+    <div class="mf"><button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="generatePDF(currentRecord)"><i class="ti ti-download" aria-hidden="true"></i> Download PDF</button></div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/smtpjs@3.1.4/src/smtp.js"></script>
 <script>
-// ── STATE ────────────────────────────────────────────────────
-let records = JSON.parse(localStorage.getItem('antvic_inductions') || '[]');
-let uploadedFiles = []; // [{name, size, type, dataUrl}]
-let currentStep = 1;
-let currentRecord = null;
-let lastSubmission = null;
-
-// ── CONFIG ───────────────────────────────────────────────────
-const cfg = JSON.parse(localStorage.getItem('antvic_cfg') || '{}');
-if (cfg.email) document.getElementById('cfg_email').value = cfg.email;
-if (cfg.service) document.getElementById('cfg_service').value = cfg.service;
-if (cfg.template) document.getElementById('cfg_template').value = cfg.template;
-if (cfg.pubkey) document.getElementById('cfg_pubkey').value = cfg.pubkey;
-
-function saveConfig() {
-  const c = {
-    email: document.getElementById('cfg_email').value,
-    service: document.getElementById('cfg_service').value,
-    template: document.getElementById('cfg_template').value,
-    pubkey: document.getElementById('cfg_pubkey').value,
-    emailOn: document.getElementById('tog_email').checked,
-    receiptOn: document.getElementById('tog_receipt').checked,
-  };
-  localStorage.setItem('antvic_cfg', JSON.stringify(c));
-  alert('Settings saved.');
-}
-
-// ── NAVIGATION ───────────────────────────────────────────────
-function showView(v) {
-  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(v + 'View').classList.add('active');
-  document.getElementById('nav' + v.charAt(0).toUpperCase() + v.slice(1)).classList.add('active');
-  if (v === 'dash') { updateStats(); renderTable(); }
-}
-
-// ── FORM STEPS ───────────────────────────────────────────────
-function goTo(step) {
-  if (step > currentStep && !validateStep(currentStep)) return;
-  if (step === 6) buildReview();
-  document.getElementById('fs' + currentStep).classList.remove('visible');
-  currentStep = step;
-  document.getElementById('fs' + currentStep).classList.add('visible');
-  updateProgress();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function updateProgress() {
-  for (let i = 1; i <= 6; i++) {
-    const el = document.getElementById('ps' + i);
-    if (!el) continue;
-    el.classList.remove('active', 'done');
-    if (i < currentStep) el.classList.add('done');
-    if (i === currentStep) el.classList.add('active');
-  }
-}
-
-function validateStep(step) {
-  const required = {
-    1: ['fname','lname','dob','mobile','email','ecname','ectel','employer','trade','startdate'],
-    2: [],
-    3: [],
-    4: [],
-    5: ['decl_name','decl_date'],
-  };
-  const fields = required[step] || [];
-  for (const id of fields) {
-    const el = document.getElementById(id);
-    if (el && !el.value.trim()) {
-      el.focus(); el.style.borderColor = 'var(--red)';
-      setTimeout(() => el.style.borderColor = '', 1500);
-      alert('Please complete all required fields.');
-      return false;
-    }
-  }
-  if (step === 1) {
-    const rtw = document.querySelector('input[name="rtw"]:checked');
-    // not strictly required for step 2
-  }
-  if (step === 5) {
-    const canvas = document.getElementById('sigCanvas');
-    const ctx = canvas.getContext('2d');
-    const px = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    const signed = Array.from(px).some((v, i) => i % 4 === 3 && v > 10);
-    if (!signed) { alert('Please provide your signature.'); return false; }
-  }
-  return true;
-}
-
-function buildReview() {
-  const cards = [
-    ['👤 Personal Details', [
-      ['Name', `${v('fname')} ${v('lname')}`],
-      ['Date of birth', v('dob')],
-      ['Mobile', v('mobile')],
-      ['Email', v('email')],
-      ['Emergency contact', `${v('ecname')} — ${v('ectel')}`],
-      ['Employer', v('employer')],
-      ['Trade', v('trade')],
-      ['Start date', v('startdate')],
-    ]],
-    ['🎓 Qualifications', [
-      ['CSCS card', `${v('cscs_type')} ${v('cscs_num') ? '(' + v('cscs_num') + ')' : ''}`],
-      ['Right to work', document.querySelector('input[name="rtw"]:checked')?.value || '—'],
-      ['ID provided', v('id_type')],
-      ['Files uploaded', uploadedFiles.length + ' file(s)'],
-    ]],
-    ['✍️ Declaration', [
-      ['Name', v('decl_name')],
-      ['Date', v('decl_date')],
-    ]],
-  ];
-  let html = '';
-  for (const [title, rows] of cards) {
-    html += `<div style="margin-bottom:1rem"><div style="font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--orange);text-transform:uppercase;margin-bottom:.5rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)">${title}</div>`;
-    for (const [lbl, val] of rows) {
-      html += `<div style="display:flex;gap:8px;padding:3px 0;font-size:13.5px"><span style="color:var(--muted);min-width:140px">${lbl}</span><strong>${val || '—'}</strong></div>`;
-    }
-    html += '</div>';
-  }
-  document.getElementById('reviewContent').innerHTML = html;
-}
-
-function v(id) { return document.getElementById(id)?.value?.trim() || ''; }
-
-// ── FILE UPLOAD ───────────────────────────────────────────────
-function dragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
-function dragLeave(e) { document.getElementById('uploadZone').classList.remove('drag-over'); }
-function dropFiles(e) { e.preventDefault(); dragLeave(e); handleFiles(e.dataTransfer.files); }
-
-function handleFiles(files) {
-  Array.from(files).forEach(file => {
-    if (file.size > 10 * 1024 * 1024) { alert(`${file.name} is too large (max 10MB)`); return; }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      uploadedFiles.push({ name: file.name, size: file.size, type: file.type, dataUrl: e.target.result });
-      renderUploadedFiles();
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function renderUploadedFiles() {
-  const container = document.getElementById('uploadedFiles');
-  container.innerHTML = uploadedFiles.map((f, i) => `
-    <div class="uploaded-file">
-      <span>${f.type.startsWith('image') ? '🖼' : '📄'}</span>
-      <span class="fname">${f.name}</span>
-      <span class="fsize">${(f.size/1024).toFixed(0)}KB</span>
-      <button class="fremove" onclick="removeFile(${i})">✕</button>
-    </div>`).join('');
-}
-
-function removeFile(i) { uploadedFiles.splice(i, 1); renderUploadedFiles(); }
-
-// ── SIGNATURE ────────────────────────────────────────────────
-const sigCanvas = document.getElementById('sigCanvas');
-const sigCtx = sigCanvas.getContext('2d');
-let drawing = false, lx = 0, ly = 0;
-
-function sigPos(e) {
-  const r = sigCanvas.getBoundingClientRect();
-  const s = e.touches ? e.touches[0] : e;
-  return [(s.clientX - r.left) * (sigCanvas.width / r.width), (s.clientY - r.top) * (sigCanvas.height / r.height)];
-}
-sigCanvas.addEventListener('mousedown', e => { drawing = true; [lx, ly] = sigPos(e); });
-sigCanvas.addEventListener('mousemove', e => {
-  if (!drawing) return;
-  const [x, y] = sigPos(e);
-  sigCtx.beginPath(); sigCtx.strokeStyle = '#2C2C2A'; sigCtx.lineWidth = 2; sigCtx.lineCap = 'round';
-  sigCtx.moveTo(lx, ly); sigCtx.lineTo(x, y); sigCtx.stroke();
-  [lx, ly] = [x, y];
-});
-sigCanvas.addEventListener('mouseup', () => drawing = false);
-sigCanvas.addEventListener('mouseleave', () => drawing = false);
-sigCanvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; [lx, ly] = sigPos(e); }, { passive: false });
-sigCanvas.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (!drawing) return;
-  const [x, y] = sigPos(e);
-  sigCtx.beginPath(); sigCtx.strokeStyle = '#2C2C2A'; sigCtx.lineWidth = 2; sigCtx.lineCap = 'round';
-  sigCtx.moveTo(lx, ly); sigCtx.lineTo(x, y); sigCtx.stroke();
-  [lx, ly] = [x, y];
-}, { passive: false });
-sigCanvas.addEventListener('touchend', () => drawing = false);
-function clearSig() { sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); }
-
-// ── SUBMIT ───────────────────────────────────────────────────
-async function submitForm() {
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'Saving...';
-
-  const cards = Array.from(document.querySelectorAll('.card-cb')).filter(c => c.checked).map(c => c.parentElement.querySelector('span').textContent);
-  const hs = Array.from(document.querySelectorAll('.hs')).map(c => c.checked);
-  const sr = Array.from(document.querySelectorAll('.sr')).map(c => c.checked);
-
-  const ref = 'ATV-MK-' + String(Math.floor(1000 + Math.random() * 9000));
-  const record = {
-    id: Date.now(),
-    ref,
-    timestamp: new Date().toISOString(),
-    fname: v('fname'), lname: v('lname'), dob: v('dob'), ni: v('ni'),
-    mobile: v('mobile'), email: v('email'),
-    ecname: v('ecname'), ectel: v('ectel'),
-    employer: v('employer'), trade: v('trade'), startdate: v('startdate'),
-    cscs_type: v('cscs_type'), cscs_num: v('cscs_num'), cscs_exp: v('cscs_exp'),
-    cards, rtw: document.querySelector('input[name="rtw"]:checked')?.value || '',
-    id_type: v('id_type'),
-    med: document.querySelector('input[name="med"]:checked')?.value || '',
-    med_detail: v('med_detail'),
-    allergy: document.querySelector('input[name="allergy"]:checked')?.value || '',
-    allergy_detail: v('allergy_detail'),
-    hs_rules: hs, site_rules: sr,
-    decl_name: v('decl_name'), decl_date: v('decl_date'),
-    signature: sigCanvas.toDataURL('image/png'),
-    comments: v('comments'),
-    files: uploadedFiles.map(f => ({ name: f.name, size: f.size, type: f.type, dataUrl: f.dataUrl })),
-    status: 'new',
-  };
-
-  records.push(record);
-  localStorage.setItem('antvic_inductions', JSON.stringify(records));
-  lastSubmission = record;
-
-  // Try email
-  await trySendEmail(record);
-
-  // Show success
-  document.getElementById('refCode').textContent = 'REF: ' + ref;
-  document.getElementById('doneDate').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  document.getElementById('fs6').classList.remove('visible');
-  document.getElementById('fsSuccess').classList.add('visible');
-  updateNavCount();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-async function trySendEmail(record) {
-  const cfg = JSON.parse(localStorage.getItem('antvic_cfg') || '{}');
-  if (!cfg.service || !cfg.template || !cfg.pubkey || !cfg.emailOn) return;
-  try {
-    if (typeof emailjs === 'undefined') {
-      await loadScript('https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js');
-    }
-    emailjs.init(cfg.pubkey);
-    await emailjs.send(cfg.service, cfg.template, {
-      to_email: cfg.email || 'slajda@gmail.com',
-      ref: record.ref,
-      worker_name: `${record.fname} ${record.lname}`,
-      trade: record.trade,
-      employer: record.employer,
-      mobile: record.mobile,
-      worker_email: record.email,
-      date: new Date(record.timestamp).toLocaleDateString('en-GB'),
-      files_count: record.files.length,
-      site: 'Caldecotte Lake Business Park, Milton Keynes',
-    });
-  } catch(e) { console.warn('Email not sent:', e.message); }
-}
-
-function loadScript(src) {
-  return new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = src; s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
-  });
-}
-
-function downloadMyPDF() { if (lastSubmission) generatePDF(lastSubmission); }
-
-function resetForm() {
-  ['fname','lname','dob','ni','mobile','email','ecname','ectel','employer','trade','startdate',
-   'cscs_type','cscs_num','cscs_exp','id_type','med_detail','allergy_detail','decl_name','decl_date','comments']
-  .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-  document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
-  document.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-  clearSig(); uploadedFiles = []; renderUploadedFiles();
-  document.getElementById('fsSuccess').classList.remove('visible');
-  currentStep = 1;
-  document.getElementById('fs1').classList.add('visible');
-  updateProgress();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ── DASHBOARD ────────────────────────────────────────────────
-function updateNavCount() {
-  document.getElementById('navCount').textContent = records.length;
-}
-
-function updateStats() {
-  const now = new Date();
-  const todayStr = now.toDateString();
-  const weekAgo = new Date(now - 7*24*60*60*1000);
-  document.getElementById('statTotal').textContent = records.length;
-  document.getElementById('statToday').textContent = records.filter(r => new Date(r.timestamp).toDateString() === todayStr).length;
-  document.getElementById('statWeek').textContent = records.filter(r => new Date(r.timestamp) >= weekAgo).length;
-  document.getElementById('statFiles').textContent = records.reduce((a, r) => a + (r.files?.length || 0), 0);
-  updateNavCount();
-}
-
-function renderTable() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const trade = document.getElementById('filterTrade').value;
-  const dateFilter = document.getElementById('filterDate').value;
-  const now = new Date();
-
-  let filtered = records.filter(r => {
-    const name = `${r.fname} ${r.lname} ${r.trade} ${r.employer}`.toLowerCase();
-    if (search && !name.includes(search)) return false;
-    if (trade && r.trade !== trade) return false;
-    if (dateFilter === 'today' && new Date(r.timestamp).toDateString() !== now.toDateString()) return false;
-    if (dateFilter === 'week' && new Date(r.timestamp) < new Date(now - 7*24*60*60*1000)) return false;
-    if (dateFilter === 'month' && new Date(r.timestamp) < new Date(now.getFullYear(), now.getMonth(), 1)) return false;
-    return true;
-  }).reverse();
-
-  const tbody = document.getElementById('tableBody');
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">${records.length ? 'No results match your filters.' : 'No inductions yet. Share the form link with workers.'}</div></div></td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(r => {
-    const date = new Date(r.timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    const statusHtml = {
-      new: '<span class="status-badge status-new">● New</span>',
-      ok: '<span class="status-badge status-ok">✓ Approved</span>',
-      flag: '<span class="status-badge status-flag">⚠ Flagged</span>',
-    }[r.status] || '';
-    return `<tr>
-      <td><div class="name-cell">${r.fname} ${r.lname}</div><div style="font-size:12px;color:var(--muted)">${r.ref}</div></td>
-      <td><span class="trade-badge">${r.trade || '—'}</span></td>
-      <td style="font-size:13px">${r.employer || '—'}</td>
-      <td style="font-size:13px;white-space:nowrap">${date}</td>
-      <td style="font-size:13px">${r.files?.length || 0} file${r.files?.length !== 1 ? 's' : ''}</td>
-      <td>${statusHtml}</td>
-      <td><div class="actions">
-        <button class="icon-btn" title="View details" onclick="viewRecord(${r.id})">👁</button>
-        <button class="icon-btn pdf-btn" title="Download PDF" onclick="generatePDF(records.find(x=>x.id===${r.id}))">📄</button>
-        <button class="icon-btn" title="Approve" onclick="setStatus(${r.id},'ok')">✓</button>
-        <button class="icon-btn" title="Flag" onclick="setStatus(${r.id},'flag')">⚠</button>
-        <button class="icon-btn" title="Delete" onclick="deleteRecord(${r.id})" style="color:var(--red)">🗑</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function clearFilters() {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('filterTrade').value = '';
-  document.getElementById('filterDate').value = '';
-  renderTable();
-}
-
-function setStatus(id, status) {
-  const r = records.find(x => x.id === id);
-  if (r) { r.status = status; localStorage.setItem('antvic_inductions', JSON.stringify(records)); renderTable(); }
-}
-
-function deleteRecord(id) {
-  if (!confirm('Delete this induction record?')) return;
-  records = records.filter(x => x.id !== id);
-  localStorage.setItem('antvic_inductions', JSON.stringify(records));
-  updateStats(); renderTable();
-}
-
-// ── MODAL ────────────────────────────────────────────────────
-function viewRecord(id) {
-  const r = records.find(x => x.id === id);
-  if (!r) return;
-  currentRecord = r;
-  document.getElementById('modalTitle').textContent = `${r.fname} ${r.lname} — ${r.ref}`;
-  const date = new Date(r.timestamp).toLocaleString('en-GB');
-
-  let html = `
-    <div class="detail-section">
-      <div class="detail-section-title">Personal Details</div>
-      <div class="detail-grid">
-        <div class="detail-field"><label>Full name</label><span>${r.fname} ${r.lname}</span></div>
-        <div class="detail-field"><label>Date of birth</label><span>${r.dob || '—'}</span></div>
-        <div class="detail-field"><label>Mobile</label><span>${r.mobile}</span></div>
-        <div class="detail-field"><label>Email</label><span>${r.email}</span></div>
-        <div class="detail-field"><label>Emergency contact</label><span>${r.ecname} — ${r.ectel}</span></div>
-        <div class="detail-field"><label>Employer</label><span>${r.employer}</span></div>
-        <div class="detail-field"><label>Trade</label><span>${r.trade}</span></div>
-        <div class="detail-field"><label>Start date</label><span>${r.startdate}</span></div>
-        <div class="detail-field"><label>Submitted</label><span>${date}</span></div>
-      </div>
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">Qualifications</div>
-      <div class="detail-grid">
-        <div class="detail-field"><label>CSCS card</label><span>${r.cscs_type || '—'} ${r.cscs_num ? '('+r.cscs_num+')' : ''}</span></div>
-        <div class="detail-field"><label>CSCS expiry</label><span>${r.cscs_exp || '—'}</span></div>
-        <div class="detail-field"><label>Right to work</label><span>${r.rtw || '—'}</span></div>
-        <div class="detail-field"><label>ID provided</label><span>${r.id_type || '—'}</span></div>
-        ${r.cards?.length ? `<div class="detail-field detail-full"><label>Additional cards</label><span>${r.cards.join(', ')}</span></div>` : ''}
-      </div>
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">Health Declarations</div>
-      <div class="detail-grid">
-        <div class="detail-field"><label>Medical condition</label><span>${r.med || '—'}${r.med_detail ? ': '+r.med_detail : ''}</span></div>
-        <div class="detail-field"><label>Allergies</label><span>${r.allergy || '—'}${r.allergy_detail ? ': '+r.allergy_detail : ''}</span></div>
-      </div>
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">H&S Rules (${r.hs_rules?.filter(Boolean).length || 0}/${r.hs_rules?.length || 0} confirmed)</div>
-      ${(r.hs_rules || []).map((c,i) => `<div class="hs-check"><span class="tick">${c?'✅':'⬜'}</span> Rule ${i+1}</div>`).join('')}
-    </div>`;
-
-  if (r.files?.length) {
-    html += `<div class="detail-section">
-      <div class="detail-section-title">Uploaded Files (${r.files.length})</div>
-      <div class="files-list">${r.files.map((f,i) => `
-        <div class="file-item">
-          <span class="fi-icon">${f.type?.startsWith('image') ? '🖼' : '📄'}</span>
-          <span class="fi-name">${f.name}</span>
-          <span class="fi-size">${(f.size/1024).toFixed(0)}KB</span>
-          <button class="fi-view" onclick="viewFile(${records.indexOf(r)},${i})">View</button>
-        </div>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  if (r.signature) {
-    html += `<div class="detail-section">
-      <div class="detail-section-title">Signature</div>
-      <img src="${r.signature}" style="max-width:100%;border:1px solid var(--border);border-radius:6px;background:var(--surface2)" alt="Signature"/>
-    </div>`;
-  }
-
-  document.getElementById('modalBody').innerHTML = html;
-  document.getElementById('detailModal').classList.add('open');
-}
-
-function viewFile(recIdx, fileIdx) {
-  const f = records[recIdx]?.files[fileIdx];
-  if (!f) return;
-  const w = window.open();
-  w.document.write(`<html><body style="margin:0;background:#111"><img src="${f.dataUrl}" style="max-width:100%;display:block;margin:auto" alt="${f.name}"/></body></html>`);
-}
-
-function closeModal() { document.getElementById('detailModal').classList.remove('open'); }
-
-// ── PDF GENERATION ───────────────────────────────────────────
-async function generatePDF(r) {
-  if (!r) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const W = 210, M = 15, CW = W - 2*M;
-  let y = 0;
-
-  const addPage = () => { doc.addPage(); y = 15; };
-  const checkY = (need) => { if (y + need > 275) addPage(); };
-
-  // Header
-  doc.setFillColor(44, 44, 42);
-  doc.rect(0, 0, W, 38, 'F');
-  doc.setFillColor(232, 101, 10);
-  doc.rect(0, 0, 6, 38, 'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.text('Antvic Ltd', 14, 11);
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('Site Induction Form', 14, 20);
-  doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.setTextColor(150,150,148);
-  doc.text('Caldecotte Lake Business Park · Milton Keynes MK7 8LF', 14, 27);
-  doc.text(`Reference: ${r.ref}  |  Date: ${new Date(r.timestamp).toLocaleDateString('en-GB')}`, 14, 33);
-  y = 46;
-
-  const section = (title) => {
-    checkY(14);
-    doc.setFillColor(242,241,237);
-    doc.rect(M, y, CW, 8, 'F');
-    doc.setFillColor(232,101,10);
-    doc.rect(M, y, 3, 8, 'F');
-    doc.setTextColor(232,101,10); doc.setFontSize(8); doc.setFont('helvetica','bold');
-    doc.text(title.toUpperCase(), M+6, y+5.5);
-    y += 11;
-  };
-
-  const row = (label, value) => {
-    checkY(8);
-    doc.setTextColor(107,107,103); doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.text(label, M, y);
-    doc.setTextColor(28,28,26); doc.setFont('helvetica','bold');
-    doc.text(String(value||'—'), M+52, y);
-    y += 6.5;
-  };
-
-  const row2 = (l1,v1,l2,v2) => {
-    checkY(8);
-    doc.setTextColor(107,107,103); doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.text(l1, M, y);
-    doc.setTextColor(28,28,26); doc.setFont('helvetica','bold');
-    doc.text(String(v1||'—'), M+40, y);
-    doc.setTextColor(107,107,103); doc.setFont('helvetica','normal');
-    doc.text(l2, M+CW/2, y);
-    doc.setTextColor(28,28,26); doc.setFont('helvetica','bold');
-    doc.text(String(v2||'—'), M+CW/2+38, y);
-    y += 6.5;
-  };
-
-  section('Personal Details');
-  row2('First name', r.fname, 'Last name', r.lname);
-  row2('Date of birth', r.dob, 'National Insurance', r.ni);
-  row2('Mobile', r.mobile, 'Email', r.email);
-  row2('Emergency contact', r.ecname, 'Emergency phone', r.ectel);
-  row('Employer', r.employer);
-  row2('Trade / role', r.trade, 'Start date', r.startdate);
-  y += 3;
-
-  section('Qualifications & Right to Work');
-  row2('CSCS card type', r.cscs_type, 'CSCS card number', r.cscs_num);
-  row2('CSCS expiry', r.cscs_exp, 'Right to work UK', r.rtw);
-  row('ID document provided', r.id_type);
-  if (r.cards?.length) row('Additional cards', r.cards.join(', '));
-  y += 3;
-
-  section('Health Declarations');
-  row2('Medical condition?', r.med, 'Allergies?', r.allergy);
-  if (r.med_detail) row('Medical details', r.med_detail);
-  if (r.allergy_detail) row('Allergy details', r.allergy_detail);
-  y += 3;
-
-  section('H&S & Site Rules Confirmation');
-  const hsCount = r.hs_rules?.filter(Boolean).length || 0;
-  const srCount = r.site_rules?.filter(Boolean).length || 0;
-  row('H&S rules confirmed', `${hsCount} of ${r.hs_rules?.length || 11} acknowledged`);
-  row('Site rules confirmed', `${srCount} of ${r.site_rules?.length || 10} acknowledged`);
-  y += 3;
-
-  section('Declaration');
-  row('Declared by', r.decl_name);
-  row('Date', r.decl_date);
-  if (r.comments) row('Comments', r.comments);
-  y += 3;
-
-  if (r.signature) {
-    checkY(40);
-    section('Signature');
-    try {
-      doc.addImage(r.signature, 'PNG', M, y, CW * 0.6, 25);
-      y += 28;
-    } catch(e) {}
-  }
-
-  if (r.files?.length) {
-    checkY(12);
-    section(`Uploaded Files (${r.files.length})`);
-    for (const f of r.files) {
-      checkY(8);
-      doc.setTextColor(28,28,26); doc.setFontSize(8); doc.setFont('helvetica','normal');
-      doc.text(`• ${f.name} (${(f.size/1024).toFixed(0)}KB)`, M+4, y);
-      y += 6;
-      if (f.type?.startsWith('image') && f.dataUrl) {
-        try {
-          checkY(50);
-          doc.addImage(f.dataUrl, M, y, Math.min(CW, 80), 0);
-          y += 55;
-        } catch(e) { /* skip corrupt images */ }
-      }
-    }
-  }
-
-  // Footer
-  doc.setFillColor(232,101,10);
-  doc.rect(0, 290, W, 2, 'F');
-  doc.setTextColor(150,150,148); doc.setFontSize(7); doc.setFont('helvetica','normal');
-  doc.text(`Antvic Ltd  |  Site Induction  |  ${r.ref}  |  Confidential`, M, 296);
-  doc.text(`${new Date(r.timestamp).toLocaleString('en-GB')}`, W-M, 296, { align: 'right' });
-
-  doc.save(`Induction_${r.fname}_${r.lname}_${r.ref}.pdf`);
-}
-
-// ── EXPORT ───────────────────────────────────────────────────
-function exportCSV() {
-  const headers = ['Ref','Date','First Name','Last Name','DOB','NI','Mobile','Email','Emergency Name','Emergency Phone','Employer','Trade','Start Date','CSCS Type','CSCS Num','CSCS Exp','Right to Work','ID Type','Medical','Allergies','H&S Confirmed','Site Rules Confirmed','Files','Status'];
-  const rows = records.map(r => [
-    r.ref, new Date(r.timestamp).toLocaleDateString('en-GB'),
-    r.fname, r.lname, r.dob, r.ni, r.mobile, r.email,
-    r.ecname, r.ectel, r.employer, r.trade, r.startdate,
-    r.cscs_type, r.cscs_num, r.cscs_exp, r.rtw, r.id_type,
-    r.med + (r.med_detail?' ('+r.med_detail+')':''),
-    r.allergy + (r.allergy_detail?' ('+r.allergy_detail+')':''),
-    `${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}`,
-    `${r.site_rules?.filter(Boolean).length||0}/${r.site_rules?.length||10}`,
-    r.files?.length||0, r.status
-  ].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
-  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Antvic_Inductions_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-}
-
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Antvic_Inductions_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-}
-
-async function exportAllPDF() {
-  const filtered = getFilteredRecords();
-  if (!filtered.length) { alert('No records to export.'); return; }
-  const btn = [...document.querySelectorAll('.btn-sm')].find(b => b.textContent.includes('Export all PDFs'));
-  if (btn) { btn.textContent = '⏳ Generating...'; btn.disabled = true; }
-  try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const W = 210, M = 15, CW = W - 2*M;
-
-    for (let ri = 0; ri < filtered.length; ri++) {
-      const r = filtered[ri];
-      if (ri > 0) doc.addPage();
-      let y = 0;
-
-      const addPage = () => { doc.addPage(); y = 15; };
-      const checkY = (need) => { if (y + need > 275) addPage(); };
-
-      // Header
-      doc.setFillColor(44,44,42); doc.rect(0,0,W,38,'F');
-      doc.setFillColor(232,101,10); doc.rect(0,0,6,38,'F');
-      doc.setTextColor(255,255,255);
-      doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.text('Antvic Ltd',14,11);
-      doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.text('Site Induction Form',14,20);
-      doc.setFontSize(8); doc.setFont('helvetica','normal');
-      doc.setTextColor(150,150,148);
-      doc.text('Caldecotte Lake Business Park · Milton Keynes MK7 8LF',14,27);
-      doc.text(`Reference: ${r.ref}  |  Date: ${new Date(r.timestamp).toLocaleDateString('en-GB')}`,14,33);
-      y = 46;
-
-      const section = (title) => {
-        checkY(14);
-        doc.setFillColor(242,241,237); doc.rect(M,y,CW,8,'F');
-        doc.setFillColor(232,101,10); doc.rect(M,y,3,8,'F');
-        doc.setTextColor(232,101,10); doc.setFontSize(8); doc.setFont('helvetica','bold');
-        doc.text(title.toUpperCase(),M+6,y+5.5); y+=11;
-      };
-      const row = (label,value) => {
-        checkY(8);
-        doc.setTextColor(107,107,103); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(label,M,y);
-        doc.setTextColor(28,28,26); doc.setFont('helvetica','bold'); doc.text(String(value||'—'),M+52,y); y+=6.5;
-      };
-      const row2 = (l1,v1,l2,v2) => {
-        checkY(8);
-        doc.setTextColor(107,107,103); doc.setFontSize(8); doc.setFont('helvetica','normal');
-        doc.text(l1,M,y); doc.setTextColor(28,28,26); doc.setFont('helvetica','bold'); doc.text(String(v1||'—'),M+40,y);
-        doc.setTextColor(107,107,103); doc.setFont('helvetica','normal');
-        doc.text(l2,M+CW/2,y); doc.setTextColor(28,28,26); doc.setFont('helvetica','bold'); doc.text(String(v2||'—'),M+CW/2+38,y); y+=6.5;
-      };
-
-      section('Personal Details');
-      row2('First name',r.fname,'Last name',r.lname);
-      row2('Date of birth',r.dob,'National Insurance',r.ni);
-      row2('Mobile',r.mobile,'Email',r.email);
-      row2('Emergency contact',r.ecname,'Emergency phone',r.ectel);
-      row('Employer',r.employer);
-      row2('Trade / role',r.trade,'Start date',r.startdate);
-      y+=3;
-
-      section('Qualifications & Right to Work');
-      row2('CSCS card type',r.cscs_type,'CSCS card number',r.cscs_num);
-      row2('CSCS expiry',r.cscs_exp,'Right to work UK',r.rtw);
-      row('ID document provided',r.id_type);
-      if (r.cards?.length) row('Additional cards',r.cards.join(', '));
-      y+=3;
-
-      section('Health Declarations');
-      row2('Medical condition?',r.med,'Allergies?',r.allergy);
-      if (r.med_detail) row('Medical details',r.med_detail);
-      if (r.allergy_detail) row('Allergy details',r.allergy_detail);
-      y+=3;
-
-      section('H&S & Site Rules Confirmation');
-      row('H&S rules confirmed',`${r.hs_rules?.filter(Boolean).length||0} of ${r.hs_rules?.length||11} acknowledged`);
-      row('Site rules confirmed',`${r.site_rules?.filter(Boolean).length||0} of ${r.site_rules?.length||10} acknowledged`);
-      y+=3;
-
-      section('Declaration');
-      row('Declared by',r.decl_name);
-      row('Date',r.decl_date);
-      if (r.comments) row('Comments',r.comments);
-      y+=3;
-
-      if (r.signature) {
-        checkY(40); section('Signature');
-        try { doc.addImage(r.signature,'PNG',M,y,CW*0.6,25); y+=28; } catch(e) {}
-      }
-
-      if (r.files?.length) {
-        checkY(12); section(`Uploaded Files (${r.files.length})`);
-        for (const f of r.files) {
-          checkY(8);
-          doc.setTextColor(28,28,26); doc.setFontSize(8); doc.setFont('helvetica','normal');
-          doc.text(`• ${f.name} (${(f.size/1024).toFixed(0)}KB)`,M+4,y); y+=6;
-          if (f.type?.startsWith('image') && f.dataUrl) {
-            try { checkY(50); doc.addImage(f.dataUrl,M,y,Math.min(CW,80),0); y+=55; } catch(e) {}
-          }
-        }
-      }
-
-      // Footer
-      doc.setFillColor(232,101,10); doc.rect(0,290,W,2,'F');
-      doc.setTextColor(150,150,148); doc.setFontSize(7); doc.setFont('helvetica','normal');
-      doc.text(`Antvic Ltd  |  Site Induction  |  ${r.ref}  |  Confidential`,M,296);
-      doc.text(`${new Date(r.timestamp).toLocaleString('en-GB')}`,W-M,296,{align:'right'});
-    }
-
-    doc.save(`Antvic_All_Inductions_${new Date().toISOString().slice(0,10)}.pdf`);
-  } finally {
-    if (btn) { btn.textContent = '📄 Export all PDFs'; btn.disabled = false; }
-  }
-}
-
-function getFilteredRecords() {
-  const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
-  const trade = document.getElementById('filterTrade')?.value || '';
-  const dateFilter = document.getElementById('filterDate')?.value || '';
-  const now = new Date();
-  return records.filter(r => {
-    const name = `${r.fname} ${r.lname} ${r.trade} ${r.employer}`.toLowerCase();
-    if (search && !name.includes(search)) return false;
-    if (trade && r.trade !== trade) return false;
-    if (dateFilter === 'today' && new Date(r.timestamp).toDateString() !== now.toDateString()) return false;
-    if (dateFilter === 'week' && new Date(r.timestamp) < new Date(now - 7*24*60*60*1000)) return false;
-    if (dateFilter === 'month' && new Date(r.timestamp) < new Date(now.getFullYear(), now.getMonth(), 1)) return false;
-    return true;
-  });
-}
-
-function clearAll() {
-  if (!confirm('Delete ALL induction records? This cannot be undone.')) return;
-  records = []; localStorage.removeItem('antvic_inductions');
-  updateStats(); renderTable();
-}
-
-// ── INIT ─────────────────────────────────────────────────────
-document.getElementById('decl_date').value = new Date().toISOString().split('T')[0];
-document.getElementById('startdate').value = new Date().toISOString().split('T')[0];
-updateNavCount();
+let records=JSON.parse(localStorage.getItem('antvic_inductions')||'[]');
+let uploadedFiles=[];let currentStep=1;let currentRecord=null;let lastSubmission=null;
+const gc=()=>JSON.parse(localStorage.getItem('antvic_cfg')||'{}');
+
+function loadConfig(){const c=gc();if(c.email)document.getElementById('cfg_email').value=c.email;if(c.site)document.getElementById('cfg_site').value=c.site;if(c.gmail_user)document.getElementById('gmail_user').value=c.gmail_user;if(c.ejs_service)document.getElementById('ejs_service').value=c.ejs_service;if(c.ejs_template)document.getElementById('ejs_template').value=c.ejs_template;if(c.ejs_pubkey)document.getElementById('ejs_pubkey').value=c.ejs_pubkey;updateGmailStatus()}
+function saveConfig(){const c=gc();c.email=document.getElementById('cfg_email').value;c.site=document.getElementById('cfg_site').value;c.emailOn=document.getElementById('tog_email').checked;c.receiptOn=document.getElementById('tog_receipt').checked;localStorage.setItem('antvic_cfg',JSON.stringify(c));showToast('Settings saved')}
+function saveGmail(){const user=document.getElementById('gmail_user').value.trim();const pass=document.getElementById('gmail_pass').value.trim();if(!user||!pass){showToast('Enter Gmail address and app password','error');return}const c=gc();c.gmail_user=user;c.gmail_pass=pass;c.email_method='gmail';localStorage.setItem('antvic_cfg',JSON.stringify(c));updateGmailStatus();testGmail(user,pass)}
+async function testGmail(user,pass){const el=document.getElementById('gmailTestResult');el.style.display='block';el.innerHTML='<span style="color:var(--tx3)">Sending test email...</span>';try{await Email.send({Host:'smtp.gmail.com',Username:user,Password:pass,To:user,From:user,Subject:'Antvic Induction System — Test Email',Body:`<p>Your Gmail integration is working correctly.</p><p>Sent: ${new Date().toLocaleString('en-GB')}</p>`});el.innerHTML='<span style="color:var(--gn)">✓ Test email sent — check your inbox.</span>';showToast('Gmail connected')}catch(e){el.innerHTML=`<span style="color:var(--rd)">✗ Failed: ${e.message||'Check your app password and try again.'}</span>`;showToast('Email test failed','error')}}
+function clearGmail(){const c=gc();delete c.gmail_user;delete c.gmail_pass;delete c.email_method;localStorage.setItem('antvic_cfg',JSON.stringify(c));document.getElementById('gmail_pass').value='';updateGmailStatus();showToast('Gmail credentials cleared')}
+function saveEmailJS(){const c=gc();c.ejs_service=document.getElementById('ejs_service').value;c.ejs_template=document.getElementById('ejs_template').value;c.ejs_pubkey=document.getElementById('ejs_pubkey').value;if(c.ejs_service&&c.ejs_template&&c.ejs_pubkey)c.email_method='emailjs';localStorage.setItem('antvic_cfg',JSON.stringify(c));showToast('EmailJS settings saved')}
+function updateGmailStatus(){const c=gc();const el=document.getElementById('gmailStatus');if(!el)return;el.innerHTML=c.gmail_user&&c.gmail_pass?`<span class="badge b-ok">✓ Connected · ${c.gmail_user}</span>`:'<span class="badge b-new">Not configured</span>'}
+
+async function sendEmail(r){const c=gc();if(!c.emailOn)return;const subj=`New Site Induction — ${r.fname} ${r.lname} — ${r.ref}`;const body=`<h2 style="color:#E8650A">New Site Induction</h2><p><b>Reference:</b> ${r.ref}</p><p><b>Worker:</b> ${r.fname} ${r.lname}</p><p><b>Trade:</b> ${r.trade}</p><p><b>Employer:</b> ${r.employer}</p><p><b>Mobile:</b> ${r.mobile}</p><p><b>Email:</b> ${r.email}</p><p><b>Start date:</b> ${r.startdate}</p><p><b>CSCS:</b> ${r.cscs_type}</p><p><b>Right to work:</b> ${r.rtw}</p><p><b>Medical:</b> ${r.med}</p><p><b>H&S confirmed:</b> ${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}</p><p><b>Files:</b> ${r.files?.length||0}</p><p><b>Submitted:</b> ${new Date(r.timestamp).toLocaleString('en-GB')}</p><hr/><p style="color:#888;font-size:12px">Antvic Site Induction System · Caldecotte Lake Business Park</p>`;
+try{if(c.email_method==='gmail'&&c.gmail_user&&c.gmail_pass){await Email.send({Host:'smtp.gmail.com',Username:c.gmail_user,Password:c.gmail_pass,To:c.email||c.gmail_user,From:c.gmail_user,Subject:subj,Body:body})}else if(c.email_method==='emailjs'&&c.ejs_service){if(typeof emailjs==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js');emailjs.init(c.ejs_pubkey);await emailjs.send(c.ejs_service,c.ejs_template,{to_email:c.email,ref:r.ref,worker_name:`${r.fname} ${r.lname}`,trade:r.trade,employer:r.employer,mobile:r.mobile,worker_email:r.email,date:new Date(r.timestamp).toLocaleDateString('en-GB'),files_count:r.files?.length||0})}}catch(e){console.warn('Email failed:',e.message)}}
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function showToast(msg,type='success'){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:1.5rem;right:1.5rem;padding:.6rem 1.1rem;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:opacity .3s;color:#fff';document.body.appendChild(t)}t.style.background=type==='error'?'#C0392B':'#2D7A3A';t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3000)}
+
+function showView(v){document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.ni').forEach(e=>e.classList.remove('active'));document.getElementById(v+'View').classList.add('active');const n=document.getElementById('nav-'+v);if(n)n.classList.add('active');const titles={dash:'Dashboard',form:'New Induction',settings:'Settings',email:'Email Setup'};document.getElementById('topbarTitle').textContent=titles[v]||v;document.getElementById('topbarActions').style.display=v==='dash'?'flex':'none';if(v==='dash'){updateStats();renderTable()}}
+
+function goTo(step){if(step>currentStep&&!validateStep(currentStep))return;if(step===6)buildReview();document.getElementById('fs'+currentStep).classList.remove('visible');currentStep=step;document.getElementById('fs'+currentStep).classList.add('visible');updateProgress();document.querySelector('.main').scrollTo({top:0,behavior:'smooth'})}
+function updateProgress(){for(let i=1;i<=6;i++){const e=document.getElementById('ps'+i);if(!e)continue;e.classList.remove('active','done');if(i<currentStep)e.classList.add('done');if(i===currentStep)e.classList.add('active')}}
+function validateStep(s){const req={1:['fname','lname','dob','mobile','email','ecname','ectel','employer','trade','startdate'],5:['decl_name','decl_date']};for(const id of(req[s]||[])){const e=document.getElementById(id);if(e&&!e.value.trim()){e.focus();e.style.borderColor='var(--rd)';setTimeout(()=>e.style.borderColor='',1500);showToast('Please complete all required fields','error');return false}}if(s===5){const px=sigCtx.getImageData(0,0,sigCanvas.width,sigCanvas.height).data;if(!Array.from(px).some((v,i)=>i%4===3&&v>10)){showToast('Please provide your signature','error');return false}}return true}
+function vv(id){return document.getElementById(id)?.value?.trim()||''}
+function buildReview(){const d=[[' Personal details',[['Name',`${vv('fname')} ${vv('lname')}`],['DOB',vv('dob')],['Mobile',vv('mobile')],['Email',vv('email')],['Emergency',`${vv('ecname')} · ${vv('ectel')}`],['Employer',vv('employer')],['Trade',vv('trade')],['Start date',vv('startdate')]]],['Qualifications',[['CSCS',`${vv('cscs_type')} ${vv('cscs_num')}`],['Right to work',document.querySelector('input[name="rtw"]:checked')?.value||'—'],['ID provided',vv('id_type')],['Files',uploadedFiles.length+' uploaded']]],['Declaration',[['Name',vv('decl_name')],['Date',vv('decl_date')]]]];document.getElementById('reviewContent').innerHTML=d.map(([t,rows])=>`<div class="ds"><div class="dt">${t}</div><div class="dg">${rows.map(([l,val])=>`<div class="df"><label>${l}</label><span>${val||'—'}</span></div>`).join('')}</div></div>`).join('')}
+
+function dragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('dov')}
+function dragLeave(e){document.getElementById('uploadZone').classList.remove('dov')}
+function dropFiles(e){e.preventDefault();dragLeave(e);handleFiles(e.dataTransfer.files)}
+function handleFiles(files){Array.from(files).forEach(f=>{if(f.size>10*1024*1024){showToast(f.name+' too large (max 10MB)','error');return}const r=new FileReader();r.onload=e=>{uploadedFiles.push({name:f.name,size:f.size,type:f.type,dataUrl:e.target.result});renderUploaded()};r.readAsDataURL(f)})}
+function renderUploaded(){document.getElementById('uploadedFiles').innerHTML=uploadedFiles.map((f,i)=>`<div class="uf"><i class="ti ${f.type.startsWith('image')?'ti-photo':'ti-file'}" style="font-size:16px;color:var(--gn)" aria-hidden="true"></i><span class="ufn">${f.name}</span><span class="ufs">${(f.size/1024).toFixed(0)}KB</span><button class="ufr" onclick="removeFile(${i})"><i class="ti ti-x" aria-hidden="true"></i></button></div>`).join('')}
+function removeFile(i){uploadedFiles.splice(i,1);renderUploaded()}
+
+const sigCanvas=document.getElementById('sigCanvas');const sigCtx=sigCanvas.getContext('2d');let drawing=false,lx=0,ly=0;
+function sPos(e){const r=sigCanvas.getBoundingClientRect();const s=e.touches?e.touches[0]:e;return[(s.clientX-r.left)*(sigCanvas.width/r.width),(s.clientY-r.top)*(sigCanvas.height/r.height)]}
+sigCanvas.addEventListener('mousedown',e=>{drawing=true;[lx,ly]=sPos(e)});
+sigCanvas.addEventListener('mousemove',e=>{if(!drawing)return;const[x,y]=sPos(e);sigCtx.beginPath();sigCtx.strokeStyle='#2C2C2A';sigCtx.lineWidth=2;sigCtx.lineCap='round';sigCtx.moveTo(lx,ly);sigCtx.lineTo(x,y);sigCtx.stroke();[lx,ly]=[x,y]});
+sigCanvas.addEventListener('mouseup',()=>drawing=false);sigCanvas.addEventListener('mouseleave',()=>drawing=false);
+sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;[lx,ly]=sPos(e)},{passive:false});
+sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const[x,y]=sPos(e);sigCtx.beginPath();sigCtx.strokeStyle='#2C2C2A';sigCtx.lineWidth=2;sigCtx.lineCap='round';sigCtx.moveTo(lx,ly);sigCtx.lineTo(x,y);sigCtx.stroke();[lx,ly]=[x,y]},{passive:false});
+sigCanvas.addEventListener('touchend',()=>drawing=false);
+function clearSig(){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height)}
+
+async function submitForm(){const btn=document.getElementById('submitBtn');btn.disabled=true;btn.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i> Saving...';const cards=Array.from(document.querySelectorAll('.card-cb')).filter(c=>c.checked).map(c=>c.parentElement.querySelector('span').textContent);const ref='ATV-MK-'+String(Math.floor(1000+Math.random()*9000));const record={id:Date.now(),ref,timestamp:new Date().toISOString(),fname:vv('fname'),lname:vv('lname'),dob:vv('dob'),ni:vv('ni'),mobile:vv('mobile'),email:vv('email'),ecname:vv('ecname'),ectel:vv('ectel'),employer:vv('employer'),trade:vv('trade'),startdate:vv('startdate'),cscs_type:vv('cscs_type'),cscs_num:vv('cscs_num'),cscs_exp:vv('cscs_exp'),cards,rtw:document.querySelector('input[name="rtw"]:checked')?.value||'',id_type:vv('id_type'),med:document.querySelector('input[name="med"]:checked')?.value||'',med_detail:vv('med_detail'),allergy:document.querySelector('input[name="allergy"]:checked')?.value||'',allergy_detail:vv('allergy_detail'),hs_rules:Array.from(document.querySelectorAll('.hs')).map(c=>c.checked),site_rules:Array.from(document.querySelectorAll('.sr')).map(c=>c.checked),decl_name:vv('decl_name'),decl_date:vv('decl_date'),signature:sigCanvas.toDataURL('image/png'),comments:vv('comments'),files:uploadedFiles.map(f=>({name:f.name,size:f.size,type:f.type,dataUrl:f.dataUrl})),status:'new'};records.push(record);localStorage.setItem('antvic_inductions',JSON.stringify(records));lastSubmission=record;await sendEmail(record);document.getElementById('refCode').textContent='REF: '+ref;document.getElementById('doneDate').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});document.getElementById('fs6').classList.remove('visible');document.getElementById('fsSuccess').classList.add('visible');updateNavCount();document.querySelector('.main').scrollTo({top:0,behavior:'smooth'})}
+function downloadMyPDF(){if(lastSubmission)generatePDF(lastSubmission)}
+function resetForm(){['fname','lname','dob','ni','mobile','email','ecname','ectel','employer','trade','startdate','cscs_type','cscs_num','cscs_exp','id_type','med_detail','allergy_detail','decl_name','decl_date','comments'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);clearSig();uploadedFiles=[];renderUploaded();document.getElementById('fsSuccess').classList.remove('visible');currentStep=1;document.getElementById('fs1').classList.add('visible');updateProgress();document.querySelector('.main').scrollTo({top:0,behavior:'smooth'})}
+
+function updateNavCount(){document.getElementById('navCount').textContent=records.length}
+function updateStats(){const now=new Date(),ts=now.toDateString(),wa=new Date(now-7*24*60*60*1000);document.getElementById('statTotal').textContent=records.length;document.getElementById('statToday').textContent=records.filter(r=>new Date(r.timestamp).toDateString()===ts).length;document.getElementById('statWeek').textContent=records.filter(r=>new Date(r.timestamp)>=wa).length;document.getElementById('statFiles').textContent=records.reduce((a,r)=>a+(r.files?.length||0),0);updateNavCount()}
+function getFiltered(){const s=document.getElementById('searchInput').value.toLowerCase();const tr=document.getElementById('filterTrade').value;const df=document.getElementById('filterDate').value;const st=document.getElementById('filterStatus').value;const now=new Date();return records.filter(r=>{const n=`${r.fname} ${r.lname} ${r.trade} ${r.employer} ${r.ref}`.toLowerCase();if(s&&!n.includes(s))return false;if(tr&&r.trade!==tr)return false;if(st&&r.status!==st)return false;if(df==='today'&&new Date(r.timestamp).toDateString()!==now.toDateString())return false;if(df==='week'&&new Date(r.timestamp)<new Date(now-7*24*60*60*1000))return false;if(df==='month'&&new Date(r.timestamp)<new Date(now.getFullYear(),now.getMonth(),1))return false;return true}).reverse()}
+function renderTable(){const f=getFiltered();const tb=document.getElementById('tableBody');if(!f.length){tb.innerHTML=`<tr><td colspan="9"><div class="empty"><i class="ti ti-clipboard-off" aria-hidden="true"></i><div class="et">${records.length?'No records match filters':'No inductions yet'}</div><div class="es">${records.length?'Try clearing filters':'Share the form link with workers'}</div></div></td></tr>`;return}const sb={new:'<span class="badge b-new">New</span>',ok:'<span class="badge b-ok">Approved</span>',flag:'<span class="badge b-flag">Flagged</span>'};tb.innerHTML=f.map(r=>{const dt=new Date(r.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});const hok=(r.hs_rules?.filter(Boolean).length||0)===(r.hs_rules?.length||11);return`<tr><td><div class="wn">${r.fname} ${r.lname}</div><div class="wr">${r.ref}</div></td><td><span class="badge b-trade">${r.trade||'—'}</span></td><td style="color:var(--tx2)">${r.employer||'—'}</td><td style="color:var(--tx2);white-space:nowrap">${r.startdate||'—'}</td><td style="color:var(--tx3);white-space:nowrap;font-size:12px">${dt}</td><td><span class="badge ${r.files?.length?'b-or':'b-trade'}">${r.files?.length||0} file${r.files?.length!==1?'s':''}</span></td><td><span class="badge ${hok?'b-ok':'b-flag'}">${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}</span></td><td>${sb[r.status]||sb.new}</td><td><div class="row-act"><button class="ib" title="View" onclick="viewRecord(${r.id})"><i class="ti ti-eye" aria-hidden="true"></i></button><button class="ib" title="PDF" onclick="generatePDF(records.find(x=>x.id===${r.id}))"><i class="ti ti-file-type-pdf" aria-hidden="true"></i></button><button class="ib" title="Approve" onclick="setStatus(${r.id},'ok')"><i class="ti ti-check" aria-hidden="true"></i></button><button class="ib" title="Flag" onclick="setStatus(${r.id},'flag')"><i class="ti ti-alert-triangle" aria-hidden="true"></i></button><button class="ib" title="Delete" onclick="deleteRecord(${r.id})" style="color:var(--rd)"><i class="ti ti-trash" aria-hidden="true"></i></button></div></td></tr>`}).join('')}
+function clearFilters(){['searchInput','filterTrade','filterDate','filterStatus'].forEach(id=>document.getElementById(id).value='');renderTable()}
+function setStatus(id,s){const r=records.find(x=>x.id===id);if(r){r.status=s;localStorage.setItem('antvic_inductions',JSON.stringify(records));renderTable()}}
+function deleteRecord(id){if(!confirm('Delete this induction record?'))return;records=records.filter(x=>x.id!==id);localStorage.setItem('antvic_inductions',JSON.stringify(records));updateStats();renderTable()}
+
+function viewRecord(id){const r=records.find(x=>x.id===id);if(!r)return;currentRecord=r;document.getElementById('modalTitle').textContent=`${r.fname} ${r.lname}`;document.getElementById('modalRef').textContent=`${r.ref} · ${new Date(r.timestamp).toLocaleString('en-GB')}`;const g=(l,v)=>`<div class="df"><label>${l}</label><span>${v||'—'}</span></div>`;let html=`<div class="ds"><div class="dt">Personal details</div><div class="dg">${g('Full name',`${r.fname} ${r.lname}`)}${g('Date of birth',r.dob)}${g('Mobile',r.mobile)}${g('Email',r.email)}${g('Emergency contact',`${r.ecname} · ${r.ectel}`)}${g('Employer',r.employer)}${g('Trade',r.trade)}${g('Start date',r.startdate)}</div></div><div class="ds"><div class="dt">Qualifications</div><div class="dg">${g('CSCS card',`${r.cscs_type||'—'} ${r.cscs_num?'('+r.cscs_num+')':''}`)}${g('CSCS expiry',r.cscs_exp)}${g('Right to work',r.rtw)}${g('ID provided',r.id_type)}${r.cards?.length?`<div class="df df-full"><label>Additional cards</label><span>${r.cards.join(', ')}</span></div>`:''}</div></div><div class="ds"><div class="dt">Health</div><div class="dg">${g('Medical',r.med+(r.med_detail?' — '+r.med_detail:''))}${g('Allergies',r.allergy+(r.allergy_detail?' — '+r.allergy_detail:''))}</div></div><div class="ds"><div class="dt">H&S rules (${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11} confirmed)</div><div class="hs-list">${(r.hs_rules||[]).map((c,i)=>`<div class="hs-row"><i class="ti ${c?'ti-circle-check':'ti-circle-x'}" style="color:${c?'var(--gn)':'var(--rd)'}" aria-hidden="true"></i>Rule ${i+1}${c?' — Confirmed':' — NOT confirmed'}</div>`).join('')}</div></div>`;if(r.files?.length)html+=`<div class="ds"><div class="dt">Files (${r.files.length})</div><div class="fl">${r.files.map((f,i)=>`<div class="fr"><i class="ti ${f.type?.startsWith('image')?'ti-photo':'ti-file'}" aria-hidden="true"></i><span class="fn">${f.name}</span><span class="fs_">${(f.size/1024).toFixed(0)}KB</span><button class="fv" onclick="viewFile(${records.indexOf(r)},${i})">View</button></div>`).join('')}</div></div>`;if(r.signature)html+=`<div class="ds"><div class="dt">Signature</div><img src="${r.signature}" style="max-width:100%;border:1px solid var(--bd);border-radius:var(--r);background:var(--sf2)" alt="Signature"/></div>`;document.getElementById('modalBody').innerHTML=html;document.getElementById('detailModal').classList.add('open')}
+function viewFile(ri,fi){const f=records[ri]?.files[fi];if(!f)return;const w=window.open();w.document.write(`<html><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="${f.dataUrl}" style="max-width:100%;max-height:100vh" alt="${f.name}"/></body></html>`)}
+function closeModal(){document.getElementById('detailModal').classList.remove('open')}
+
+async function generatePDF(r){if(!r)return;const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const W=210,M=15,CW=W-2*M;let y=0;const ap=()=>{doc.addPage();y=15};const cy=(n)=>{if(y+n>275)ap()};doc.setFillColor(44,44,42);doc.rect(0,0,W,38,'F');doc.setFillColor(232,101,10);doc.rect(0,0,6,38,'F');doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Antvic Ltd',14,11);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('Site Induction Form',14,20);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(150,150,148);doc.text('Caldecotte Lake Business Park · Milton Keynes MK7 8LF',14,27);doc.text(`Reference: ${r.ref}  |  Date: ${new Date(r.timestamp).toLocaleDateString('en-GB')}`,14,33);y=46;const sec=(t)=>{cy(14);doc.setFillColor(242,241,237);doc.rect(M,y,CW,8,'F');doc.setFillColor(232,101,10);doc.rect(M,y,3,8,'F');doc.setTextColor(232,101,10);doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text(t.toUpperCase(),M+6,y+5.5);y+=11};const row=(l,val)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(val||'—'),M+52,y);y+=6.5};const row2=(l1,v1,l2,v2)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l1,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v1||'—'),M+40,y);doc.setTextColor(107,107,103);doc.setFont('helvetica','normal');doc.text(l2,M+CW/2,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v2||'—'),M+CW/2+38,y);y+=6.5};sec('Personal Details');row2('First name',r.fname,'Last name',r.lname);row2('Date of birth',r.dob,'National Insurance',r.ni);row2('Mobile',r.mobile,'Email',r.email);row2('Emergency contact',r.ecname,'Emergency phone',r.ectel);row('Employer',r.employer);row2('Trade / role',r.trade,'Start date',r.startdate);y+=3;sec('Qualifications & Right to Work');row2('CSCS card type',r.cscs_type,'CSCS card number',r.cscs_num);row2('CSCS expiry',r.cscs_exp,'Right to work UK',r.rtw);row('ID document provided',r.id_type);if(r.cards?.length)row('Additional cards',r.cards.join(', '));y+=3;sec('Health Declarations');row2('Medical condition?',r.med,'Allergies?',r.allergy);if(r.med_detail)row('Medical details',r.med_detail);if(r.allergy_detail)row('Allergy details',r.allergy_detail);y+=3;sec('H&S & Site Rules');row('H&S rules confirmed',`${r.hs_rules?.filter(Boolean).length||0} of ${r.hs_rules?.length||11} acknowledged`);row('Site rules confirmed',`${r.site_rules?.filter(Boolean).length||0} of ${r.site_rules?.length||11} acknowledged`);y+=3;sec('Declaration');row('Declared by',r.decl_name);row('Date',r.decl_date);if(r.comments)row('Comments',r.comments);y+=3;if(r.signature){cy(40);sec('Signature');try{doc.addImage(r.signature,'PNG',M,y,CW*0.6,25);y+=28}catch(e){}}if(r.files?.length){cy(12);sec(`Uploaded Files (${r.files.length})`);for(const f of r.files){cy(8);doc.setTextColor(28,28,26);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(`• ${f.name} (${(f.size/1024).toFixed(0)}KB)`,M+4,y);y+=6;if(f.type?.startsWith('image')&&f.dataUrl){try{cy(55);doc.addImage(f.dataUrl,M,y,Math.min(CW,80),0);y+=55}catch(e){}}}}doc.setFillColor(232,101,10);doc.rect(0,290,W,2,'F');doc.setTextColor(150,150,148);doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(`Antvic Ltd  |  Site Induction  |  ${r.ref}  |  Confidential`,M,296);doc.text(new Date(r.timestamp).toLocaleString('en-GB'),W-M,296,{align:'right'});doc.save(`Induction_${r.fname}_${r.lname}_${r.ref}.pdf`)}
+
+async function exportAllPDF(){const f=getFiltered();if(!f.length){showToast('No records to export','error');return}showToast(`Generating ${f.length} PDF${f.length!==1?'s':''}...`);const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const W=210,M=15,CW=W-2*M;for(let ri=0;ri<f.length;ri++){const r=f[ri];if(ri>0)doc.addPage();let y=0;const ap=()=>{doc.addPage();y=15};const cy=(n)=>{if(y+n>275)ap()};doc.setFillColor(44,44,42);doc.rect(0,0,W,38,'F');doc.setFillColor(232,101,10);doc.rect(0,0,6,38,'F');doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Antvic Ltd',14,11);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('Site Induction Form',14,20);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(150,150,148);doc.text('Caldecotte Lake Business Park · Milton Keynes MK7 8LF',14,27);doc.text(`Reference: ${r.ref}  |  Date: ${new Date(r.timestamp).toLocaleDateString('en-GB')}`,14,33);y=46;const sec=(t)=>{cy(14);doc.setFillColor(242,241,237);doc.rect(M,y,CW,8,'F');doc.setFillColor(232,101,10);doc.rect(M,y,3,8,'F');doc.setTextColor(232,101,10);doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text(t.toUpperCase(),M+6,y+5.5);y+=11};const row=(l,val)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(val||'—'),M+52,y);y+=6.5};const row2=(l1,v1,l2,v2)=>{cy(8);doc.setTextColor(107,107,103);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(l1,M,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v1||'—'),M+40,y);doc.setTextColor(107,107,103);doc.setFont('helvetica','normal');doc.text(l2,M+CW/2,y);doc.setTextColor(28,28,26);doc.setFont('helvetica','bold');doc.text(String(v2||'—'),M+CW/2+38,y);y+=6.5};sec('Personal Details');row2('First name',r.fname,'Last name',r.lname);row2('Mobile',r.mobile,'Email',r.email);row('Employer',r.employer);row2('Trade',r.trade,'Start date',r.startdate);y+=3;sec('Qualifications');row2('CSCS',r.cscs_type,'Card No.',r.cscs_num);row2('Expiry',r.cscs_exp,'Right to work',r.rtw);y+=3;sec('H&S & Declaration');row('H&S confirmed',`${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}`);row('Site rules',`${r.site_rules?.filter(Boolean).length||0}/${r.site_rules?.length||11}`);row('Declared by',r.decl_name);row('Date',r.decl_date);y+=3;if(r.signature){cy(35);sec('Signature');try{doc.addImage(r.signature,'PNG',M,y,CW*0.5,22);y+=25}catch(e){}}doc.setFillColor(232,101,10);doc.rect(0,290,W,2,'F');doc.setTextColor(150,150,148);doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(`Antvic Ltd  |  ${r.ref}  |  Confidential`,M,296);doc.text(new Date(r.timestamp).toLocaleString('en-GB'),W-M,296,{align:'right'})}doc.save(`Antvic_All_Inductions_${new Date().toISOString().slice(0,10)}.pdf`);showToast(`Exported ${f.length} records`)}
+
+function exportCSV(){const h=['Ref','Date','First Name','Last Name','DOB','NI','Mobile','Email','Emergency Name','Emergency Phone','Employer','Trade','Start Date','CSCS Type','CSCS Num','CSCS Exp','Right to Work','ID Type','Medical','Allergies','H&S Confirmed','Site Rules Confirmed','Files','Status'];const rows=records.map(r=>[r.ref,new Date(r.timestamp).toLocaleDateString('en-GB'),r.fname,r.lname,r.dob,r.ni,r.mobile,r.email,r.ecname,r.ectel,r.employer,r.trade,r.startdate,r.cscs_type,r.cscs_num,r.cscs_exp,r.rtw,r.id_type,r.med+(r.med_detail?' ('+r.med_detail+')':''),r.allergy+(r.allergy_detail?' ('+r.allergy_detail+')':''),`${r.hs_rules?.filter(Boolean).length||0}/${r.hs_rules?.length||11}`,`${r.site_rules?.filter(Boolean).length||0}/${r.site_rules?.length||11}`,r.files?.length||0,r.status].map(v=>`"${String(v||'').replace(/"/g,'""')}"`));const blob=new Blob([[h.join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Antvic_Inductions_${new Date().toISOString().slice(0,10)}.csv`;a.click()}
+function exportJSON(){const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Antvic_Inductions_${new Date().toISOString().slice(0,10)}.json`;a.click()}
+function clearAll(){if(!confirm('Delete ALL induction records? This cannot be undone.'))return;records=[];localStorage.removeItem('antvic_inductions');updateStats();renderTable();showToast('All records cleared')}
+
+document.getElementById('decl_date').value=new Date().toISOString().split('T')[0];
+document.getElementById('startdate').value=new Date().toISOString().split('T')[0];
+updateNavCount();updateStats();renderTable();loadConfig();
 </script>
 </body>
 </html>
