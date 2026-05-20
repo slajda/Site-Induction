@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Antvic Ltd — Site Induction Form</title>
+<title>Antvic Ltd â Site Induction Form</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -383,7 +383,7 @@ input.invalid, select.invalid, textarea.invalid {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── MOBILE ─────────────────────────────────────────────────── */
+/* ââ MOBILE âââââââââââââââââââââââââââââââââââââââââââââââââââ */
 @media (max-width: 640px) {
   .page-wrap { padding: 18px 14px 56px; }
   .header { gap: 10px; margin-bottom: 20px; }
@@ -409,7 +409,8 @@ input.invalid, select.invalid, textarea.invalid {
   select, textarea { font-size: 16px; }
 }
 </style>
-</head>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script></head>
 <body>
 
 <div class="top-bar"></div>
@@ -623,6 +624,44 @@ input.invalid, select.invalid, textarea.invalid {
 'use strict';
 var RECIPIENT = 'slajda@gmail.com'; // display only
 var WEB3FORMS_KEY = '0e3ce590-7261-4fad-87ee-0ceeb108c4d4';
+var GOOGLE_CLIENT_ID = '594265735804-aj903233eqm3ub5iheq4c9iq05mc2vok.apps.googleusercontent.com';
+var GOOGLE_SHEETS_ID = ''; // Set your Google Sheets ID here
+var googleAccessToken = null;
+
+// Google Sheets integration
+function collectFormData() {
+  return {
+    date: new Date().toLocaleDateString('en-GB'),
+    fullName: (document.getElementById('fullName')||{}).value||'',
+    dob: (document.getElementById('dob')||{}).value||'',
+    phone: (document.getElementById('phone')||{}).value||'',
+    email: (document.getElementById('email')||{}).value||'',
+    address: (document.getElementById('address')||{}).value||'',
+    nextKinName: (document.getElementById('nextKinName')||{}).value||'',
+    nextKinPhone: (document.getElementById('nextKinPhone')||{}).value||'',
+    company: (document.getElementById('company')||{}).value||'',
+    jobRole: (document.getElementById('jobRole')||{}).value||'',
+    site: (document.getElementById('site')||{}).value||'',
+    inductionDate: (document.getElementById('inductionDate')||{}).value||'',
+    cscsCard: (document.getElementById('cscsCardNum')||{}).value||'',
+    cscsType: (document.getElementById('cscsType')||{}).value||'',
+    declarantName: (document.getElementById('declarantName')||{}).value||'',
+    inductedBy: (document.getElementById('inductedBy')||{}).value||''
+  };
+}
+function saveToGoogleSheets(token) {
+  if (!GOOGLE_SHEETS_ID) { console.warn('GOOGLE_SHEETS_ID not set'); return; }
+  var fd = collectFormData();
+  var row = [fd.date,fd.fullName,fd.dob,fd.phone,fd.email,fd.address,fd.nextKinName,fd.nextKinPhone,fd.company,fd.jobRole,fd.site,fd.inductionDate,fd.cscsCard,fd.cscsType,fd.declarantName,fd.inductedBy];
+  fetch('https://sheets.googleapis.com/v4/spreadsheets/'+GOOGLE_SHEETS_ID+'/values/Sheet1!A1:append?valueInputOption=USER_ENTERED',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({values:[row]})
+  }).then(function(r){return r.json();}).then(function(res){
+    var btn=document.getElementById('googleSheetsBtn');
+    if(btn){btn.textContent='\u2705 Saved to Google Sheets';btn.style.background='#1a9e5c';btn.disabled=true;}
+  }).catch(function(e){console.log('Sheets error:',e.message);});
+}
 
 // Progress bar
 function updateProgress() {
@@ -825,10 +864,6 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
       fd.append('25 Signature', sigBlob, sigName);
     }
 
-    // Attachments
-    uploadedFiles.forEach(function(f, i) {
-      fd.append('26 Attachment ' + (i + 1), f, f.name);
-    });
 
     fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd })
       .then(function(r) {
@@ -845,6 +880,18 @@ document.getElementById('inductionForm').addEventListener('submit', function(e) 
           s.style.display = 'block';
           s.scrollIntoView({ behavior: 'smooth' });
           btn.innerHTML = '&#10003; Submitted';
+          if (!googleAccessToken) {
+            google.accounts.oauth2.initTokenClient({
+              client_id: GOOGLE_CLIENT_ID,
+              scope: 'https://www.googleapis.com/auth/spreadsheets',
+              callback: function(response) {
+                googleAccessToken = response.access_token;
+                saveToGoogleSheets(googleAccessToken);
+              }
+            }).requestAccessToken();
+          } else {
+            saveToGoogleSheets(googleAccessToken);
+          }
           btn.style.background = 'var(--success)';
           document.getElementById('progressFill').style.width = '100%';
         } else {
